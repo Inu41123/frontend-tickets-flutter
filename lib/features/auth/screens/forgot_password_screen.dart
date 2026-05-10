@@ -1,11 +1,70 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import '../../../core/theme/app_theme.dart';
 import '../widgets/custom_text_field.dart';
-// Importa la siguiente pantalla para la navegación
 import 'verification_code_screen.dart'; 
 
-class ForgotPasswordScreen extends StatelessWidget {
+class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({Key? key}) : super(key: key);
+
+  @override
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+}
+
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+  // 1. Controlador para atrapar el correo que escriba el usuario
+  final TextEditingController _emailController = TextEditingController();
+
+  // 2. Función para pedirle el código al backend
+  Future<void> _pedirCodigo() async {
+    final email = _emailController.text.trim();
+
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor ingresa tu correo'), backgroundColor: Colors.orange),
+      );
+      return;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://10.0.2.2:3005/usuarios/solicitar-codigo'), // Puerto 3005
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'correo': email}),
+      );
+
+      if (response.statusCode == 200) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Código enviado a tu correo'), backgroundColor: Colors.green),
+          );
+          
+          // 3. ¡EL ARREGLO DEL ERROR! Le pasamos los datos que exige la pantalla
+          Navigator.push(
+            context, 
+            MaterialPageRoute(builder: (context) => VerificationCodeScreen(
+              email: email,                  // Pasamos el correo
+              isForRegistration: false,      // ¡Le decimos que NO es registro, es recuperación!
+            ))
+          );
+        }
+      } else {
+        final error = jsonDecode(response.body);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(error['mensaje']), backgroundColor: Colors.red),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error al conectar con el servidor'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +72,6 @@ class ForgotPasswordScreen extends StatelessWidget {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Engranajes Superiores
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -26,7 +84,6 @@ class ForgotPasswordScreen extends StatelessWidget {
             ],
           ),
 
-          // Contenido Central
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30.0),
             child: Column(
@@ -37,24 +94,23 @@ class ForgotPasswordScreen extends StatelessWidget {
                   style: TextStyle(color: AppTheme.textBodyColor, fontSize: 14, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 30),
-                const CustomAuthTextField(
+                
+                CustomAuthTextField(
                   label: 'Correo electrónico',
                   prefixIcon: Icons.person_outline,
                   keyboardType: TextInputType.emailAddress,
+                  controller: _emailController, // <-- Conectamos el input
                 ),
                 const SizedBox(height: 30),
+                
                 ElevatedButton(
-                  onPressed: () {
-                    // Navegamos a la pantalla del código
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => const VerificationCodeScreen()));
-                  },
+                  onPressed: _pedirCodigo, // <-- Conectamos el botón al backend
                   child: const Text('Enviar'),
                 ),
               ],
             ),
           ),
 
-          // Engranaje Inferior
           Align(
             alignment: Alignment.bottomRight,
             child: Image.asset('assets/images/engrane_abajo.png', width: 150),

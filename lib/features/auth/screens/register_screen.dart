@@ -38,7 +38,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       String nombreCompleto = '${_nombreController.text.trim()} ${_apellidosController.text.trim()}';
 
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:3000/usuarios/registro'),
+        Uri.parse('http://10.0.2.2:3005/usuarios/registro'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'nombreCompleto': nombreCompleto,
@@ -54,9 +54,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
             const SnackBar(content: Text('¡Cuenta creada! Revisa tu correo'), backgroundColor: Colors.green),
           );
           // Lo mandamos a la pantalla para que meta el código de 6 dígitos
+// Lo mandamos a la pantalla para que meta el código de 6 dígitos
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const VerificationCodeScreen()),
+            MaterialPageRoute(builder: (context) => VerificationCodeScreen(
+              email: _emailController.text.trim(), // Le pasamos el correo
+              isForRegistration: true,             // ¡Le decimos que es un registro!
+            )),
           );
         }
       } else {

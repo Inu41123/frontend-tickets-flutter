@@ -24,19 +24,38 @@ class _LoginScreenState extends State<LoginScreen> {
   // 2. Función para conectarse al backend
   Future<void> _hacerLogin() async {
     try {
-      // Recuerda usar 10.0.2.2 si estás en el emulador de Android local
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:3000/usuarios/login'),
+        Uri.parse('http://10.0.2.2:3005/usuarios/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          'correo': _emailController.text,
+          'correo': _emailController.text.trim(), // Le puse .trim() para limpiar espacios fantasma
           'password': _passwordController.text
         }),
       );
 
+      // ¡NUEVO!: Imprimimos la respuesta cruda en la consola para ver qué nos mandaron
+      print("======= RESPUESTA DEL SERVIDOR =======");
+      print("Status Code: ${response.statusCode}");
+      print("Body: ${response.body}");
+      print("======================================");
+
+      // ESCUDO: Si la respuesta es HTML, detenemos todo para que no explote la app
+      if (response.body.startsWith('<!DOCTYPE html>') || response.body.startsWith('<html')) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Error del servidor: Devolvió HTML en lugar de JSON. Revisa la consola.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return; // Cortamos la función aquí
+      }
+
+      // Si pasamos el escudo, significa que sí es un JSON
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print("Token recibido: ${data['token']}"); // Para verificar en consola
+        print("Token recibido: ${data['token']}"); 
         
         if (mounted) {
           Navigator.pushReplacement(
@@ -53,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       }
     } catch (e) {
-      print("Error de conexión: $e");
+      print("Error de conexión interno: $e");
       if (mounted) {
          ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Error al conectar con el servidor.'), backgroundColor: Colors.red),
