@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_theme.dart';
 import 'add_ticket_screen.dart';
+import '../widgets/custom_drawer.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -275,14 +276,30 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
         backgroundColor: AppTheme.backgroundColor, elevation: 0, iconTheme: const IconThemeData(color: AppTheme.primaryColor),
-        title: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.confirmation_num, color: AppTheme.primaryColor), SizedBox(width: 8), Text('GestiónTech', style: TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold)), SizedBox(width: 48)]),
+        //title: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.confirmation_num, color: AppTheme.primaryColor), SizedBox(width: 8), Text('GestiónTech', style: TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold)), SizedBox(width: 48)]),
+        title: Row(
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: [
+    Image.asset('assets/images/logotech.png', height: 35), // <-- TU LOGO AQUÍ
+    const SizedBox(width: 48), // Mantenemos este espacio para que quede bien centrado
+  ],
+),
       ),
-      drawer: const Drawer(), 
+      drawer: const CustomDrawer(), 
       body: SingleChildScrollView(
         child: Column(
           children: [
             Container(
-              width: double.infinity, padding: const EdgeInsets.only(top: 30, bottom: 50, left: 20, right: 20), decoration: const BoxDecoration(color: Color(0xFF7D8B7A)),
+              width: double.infinity, padding: const EdgeInsets.only(top: 30, bottom: 50, left: 20, right: 20), 
+              //decoration: const BoxDecoration(color: Color(0xFF7D8B7A)), 
+              decoration: const BoxDecoration(
+  color: Color.fromARGB(255, 131, 148, 127),
+  image: DecorationImage(
+    image: AssetImage('assets/images/fondo_tech.png'), // <-- TU ILUSTRACIÓN AQUÍ
+    fit: BoxFit.cover, // Para que cubra todo el contenedor
+    opacity: 0.7, // Opacidad baja para que no estorbe la lectura de los números
+  ),
+),
               child: Column(
                 children: [
                   Container(
