@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../widgets/custom_text_field.dart';
 import 'register_screen.dart'; 
 import '../../tickets/screens/home_screen.dart'; // Asegúrate de haber creado este archivo
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -56,6 +57,10 @@ class _LoginScreenState extends State<LoginScreen> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         print("Token recibido: ${data['token']}"); 
+
+        // ¡NUEVO! Guardamos el token como si fuera una "cookie"
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', data['token']);
         
         if (mounted) {
           Navigator.pushReplacement(
