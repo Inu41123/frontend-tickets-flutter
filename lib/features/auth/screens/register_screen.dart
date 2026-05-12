@@ -193,9 +193,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Image.asset('assets/images/google_logo.png', height: 30),
+                      Image.asset('assets/logos/google_logo.png', height: 30),
                       const SizedBox(width: 30),
-                      Image.asset('assets/images/facebook_logo.png', height: 30),
+                      Image.asset('assets/logos/facebook_logo.png', height: 30),
                     ],
                   ),
                   const SizedBox(height: 40),
