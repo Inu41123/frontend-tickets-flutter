@@ -148,6 +148,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   // EL MODAL VISUAL PARA EDITAR
+// EL MODAL VISUAL PARA EDITAR (Estilo Stefany)
   void _mostrarModalEditar() {
     TextEditingController nombreCtrl = TextEditingController(text: _nombre);
     TextEditingController telCtrl = TextEditingController(text: _telefono == 'No registrado' ? '' : _telefono);
@@ -158,6 +159,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (context) {
         return Dialog(
+          backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           insetPadding: const EdgeInsets.all(20),
           child: ClipRRect(
@@ -166,34 +168,64 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Cabecera con el color Verde de Stefany
                   Container(
-                    width: double.infinity, padding: const EdgeInsets.symmetric(vertical: 20), color: const Color(0xFFFFD166),
-                    child: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.edit, color: Colors.black), SizedBox(width: 10), Text('Editar Perfil', style: TextStyle(color: Colors.black, fontSize: 22, fontWeight: FontWeight.bold))]),
+                    width: double.infinity, 
+                    padding: const EdgeInsets.symmetric(vertical: 20), 
+                    color: const Color(0xFFA1B6AA), // AppColors.verde
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center, 
+                      children: [
+                        Icon(Icons.edit, color: Colors.white), 
+                        SizedBox(width: 10), 
+                        Text('Editar Perfil', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold))
+                      ]
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Nombre:', style: TextStyle(fontWeight: FontWeight.bold)), const SizedBox(height: 5),
-                        TextField(controller: nombreCtrl, decoration: InputDecoration(filled: true, fillColor: AppTheme.inputColor, border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none))),
+                        const Text('Nombre:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)), 
+                        const SizedBox(height: 5),
+                        TextField(
+                          controller: nombreCtrl, 
+                          decoration: InputDecoration(filled: true, fillColor: const Color(0xFFE8EEDF), border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none), contentPadding: const EdgeInsets.symmetric(horizontal: 15))
+                        ),
                         const SizedBox(height: 15),
-                        const Text('Teléfono:', style: TextStyle(fontWeight: FontWeight.bold)), const SizedBox(height: 5),
-                        TextField(controller: telCtrl, keyboardType: TextInputType.phone, decoration: InputDecoration(filled: true, fillColor: AppTheme.inputColor, border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none))),
+                        
+                        const Text('Teléfono:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)), 
+                        const SizedBox(height: 5),
+                        TextField(
+                          controller: telCtrl, keyboardType: TextInputType.phone, 
+                          decoration: InputDecoration(filled: true, fillColor: const Color(0xFFE8EEDF), border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none), contentPadding: const EdgeInsets.symmetric(horizontal: 15))
+                        ),
                         const SizedBox(height: 15),
-                        const Text('Calle y Número:', style: TextStyle(fontWeight: FontWeight.bold)), const SizedBox(height: 5),
-                        TextField(controller: calleCtrl, decoration: InputDecoration(filled: true, fillColor: AppTheme.inputColor, border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none))),
+                        
+                        const Text('Calle y Número:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)), 
+                        const SizedBox(height: 5),
+                        TextField(
+                          controller: calleCtrl, 
+                          decoration: InputDecoration(filled: true, fillColor: const Color(0xFFE8EEDF), border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none), contentPadding: const EdgeInsets.symmetric(horizontal: 15))
+                        ),
                         const SizedBox(height: 15),
-                        const Text('Colonia:', style: TextStyle(fontWeight: FontWeight.bold)), const SizedBox(height: 5),
-                        TextField(controller: coloniaCtrl, decoration: InputDecoration(filled: true, fillColor: AppTheme.inputColor, border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none))),
+                        
+                        const Text('Colonia:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)), 
+                        const SizedBox(height: 5),
+                        TextField(
+                          controller: coloniaCtrl, 
+                          decoration: InputDecoration(filled: true, fillColor: const Color(0xFFE8EEDF), border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none), contentPadding: const EdgeInsets.symmetric(horizontal: 15))
+                        ),
                         const SizedBox(height: 30),
+                        
                         Row(
                           children: [
-                            Expanded(child: ElevatedButton(onPressed: () => Navigator.pop(context), style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF90A48E), padding: const EdgeInsets.symmetric(vertical: 15)), child: const Text('Cancelar', style: TextStyle(color: Colors.white)))),
+                            Expanded(child: ElevatedButton(onPressed: () => Navigator.pop(context), style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFF6363), padding: const EdgeInsets.symmetric(vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18))), child: const Text('Cancelar', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)))),
                             const SizedBox(width: 15),
                             Expanded(child: ElevatedButton(
                               onPressed: () => _actualizarPerfil(nombreCtrl.text, telCtrl.text, calleCtrl.text, coloniaCtrl.text),
-                              style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryColor, padding: const EdgeInsets.symmetric(vertical: 15)), child: const Text('Guardar', style: TextStyle(color: Colors.white)))),
+                              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFFDF57), padding: const EdgeInsets.symmetric(vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18))), child: const Text('Guardar', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)))),
                           ],
                         )
                       ],
@@ -207,6 +239,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       },
     );
   }
+
+
+
 
   @override
   Widget build(BuildContext context) {

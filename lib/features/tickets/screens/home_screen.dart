@@ -147,9 +147,13 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _mostrarModalEditar(dynamic ticket) {
+
+  // --- FUNCIONES PARA MOSTRAR LOS MODALES DE EDICIÓN ---
+
+void _mostrarModalEditar(dynamic ticket) {
     TextEditingController nombreCtrl = TextEditingController(text: ticket['nombre']);
     TextEditingController probCtrl = TextEditingController(text: ticket['problema']);
+    
     int prioridadNum = ticket['prioridad'] ?? 5;
     String prioridadSel = 'Mínima';
     if (prioridadNum == 1) prioridadSel = 'Crítica';
@@ -162,62 +166,139 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context) {
         return StatefulBuilder(builder: (context, setStateModal) {
           return Dialog(
+            backgroundColor: Colors.white, // Fondo del diálogo blanco
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             insetPadding: const EdgeInsets.all(20),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(20),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: double.infinity, padding: const EdgeInsets.symmetric(vertical: 20), color: const Color(0xFF7D8B7A),
-                      child: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.edit, color: Colors.white), SizedBox(width: 10), Text('Editar Ticket', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold))]),
+              // Ponemos el Stack FUERA del SingleChildScrollView para que los engranajes
+              // se queden fijos mientras el usuario hace scroll en el formulario.
+              child: Stack(
+                children: [
+                  // --- MARCAS DE AGUA (ENGRANAJES) DEL FONDO ---
+                  
+                  // 1. Engranaje hasta arriba a la derecha (abajo del Editar Ticket)
+                  Positioned(
+                    top: 100, // Justo debajo de la cabecera verde (que mide aprox 80)
+                    right: -30, // Se asoma ligeramente
+                    child: Opacity(
+                      opacity: 0.3, // Muy transparente
+                      child: Image.asset('assets/images/engrane_izq.png', width: 130), // Usamos una versión más pequeña
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Nombre:', style: TextStyle(fontWeight: FontWeight.bold)), const SizedBox(height: 5),
-                          TextField(controller: nombreCtrl, decoration: InputDecoration(filled: true, fillColor: AppTheme.inputColor, border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none))),
-                          const SizedBox(height: 15),
-                          const Text('Descripción:', style: TextStyle(fontWeight: FontWeight.bold)), const SizedBox(height: 5),
-                          TextField(controller: probCtrl, maxLines: 4, decoration: InputDecoration(filled: true, fillColor: AppTheme.inputColor, border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none))),
-                          const SizedBox(height: 15),
-                          const Text('Prioridad', style: TextStyle(fontWeight: FontWeight.bold)), const SizedBox(height: 5),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 15), decoration: BoxDecoration(color: AppTheme.inputColor, borderRadius: BorderRadius.circular(15)),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<String>(
-                                value: prioridadSel, isExpanded: true,
-                                items: ['Crítica', 'Alta', 'Media', 'Baja', 'Mínima'].map((String val) => DropdownMenuItem(value: val, child: Text(val))).toList(),
-                                onChanged: (nuevoVal) => setStateModal(() => prioridadSel = nuevoVal!),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 30),
-                          Row(
+                  ),
+
+                  // 2. Engranaje abajo a la derecha
+                  Positioned(
+                    bottom: -30, // Se asoma por abajo
+                    right: -20,
+                    child: Opacity(
+                      opacity: 0.4,
+                      child: Image.asset('assets/images/engrane_abajo.png', width: 150),
+                    ),
+                  ),
+
+                  // 3. Engranaje en el lado izquierdo por debajo de la prioridad
+                  Positioned(
+                    bottom: 120, // Ajustado para quedar en la zona media-baja izquierda
+                    left: -40, // Se asoma por la izquierda
+                    child: Opacity(
+                      opacity: 0.3,
+                      child: Image.asset('assets/images/engrane_izq.png', width: 180), // Más grande
+                    ),
+                  ),
+
+                  // --- CONTENIDO DEL FORMULARIO (POR ENCIMA DE LOS ENGRANAJES) ---
+                  SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Header Verde (Fijo arriba del contenido)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          color: const Color(0xFF7D8B7A),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Expanded(child: ElevatedButton(onPressed: () => Navigator.pop(context), style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF90A48E), padding: const EdgeInsets.symmetric(vertical: 15)), child: const Text('Cancelar', style: TextStyle(color: Colors.white)))),
-                              const SizedBox(width: 15),
-                              Expanded(child: ElevatedButton(
-                                onPressed: () {
-                                  int nuevaPrio = 5;
-                                  if (prioridadSel == 'Crítica') nuevaPrio = 1;
-                                  if (prioridadSel == 'Alta') nuevaPrio = 2;
-                                  if (prioridadSel == 'Media') nuevaPrio = 3;
-                                  if (prioridadSel == 'Baja') nuevaPrio = 4;
-                                  _enviarEdicion(ticket['_id'], nombreCtrl.text, probCtrl.text, nuevaPrio);
-                                },
-                                style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryColor, padding: const EdgeInsets.symmetric(vertical: 15)), child: const Text('Guardar', style: TextStyle(color: Colors.white)))),
+                              Icon(Icons.edit, color: Colors.white),
+                              SizedBox(width: 10),
+                              Text('Editar Ticket', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
                             ],
-                          )
-                        ],
-                      ),
+                          ),
+                        ),
+                        
+                        // Formulario con Padding (Fondo transparente para ver los engranajes)
+                        Padding(
+                          padding: const EdgeInsets.all(20),
+                          // Importante: El Column no debe tener color de fondo
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Nombre:', style: TextStyle(fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 5),
+                              TextField(
+                                controller: nombreCtrl,
+                                decoration: InputDecoration(filled: true, fillColor: AppTheme.inputColor.withOpacity(0.8), border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none)),
+                              ),
+                              const SizedBox(height: 15),
+                              const Text('Descripción:', style: TextStyle(fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 5),
+                              TextField(
+                                controller: probCtrl,
+                                maxLines: 4,
+                                decoration: InputDecoration(filled: true, fillColor: AppTheme.inputColor.withOpacity(0.8), border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none)),
+                              ),
+                              const SizedBox(height: 15),
+                              const Text('Prioridad', style: TextStyle(fontWeight: FontWeight.bold)),
+                              const SizedBox(height: 5),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 15),
+                                decoration: BoxDecoration(color: AppTheme.inputColor.withOpacity(0.8), borderRadius: BorderRadius.circular(15)),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<String>(
+                                    value: prioridadSel,
+                                    isExpanded: true,
+                                    items: ['Crítica', 'Alta', 'Media', 'Baja', 'Mínima'].map((String val) => DropdownMenuItem(value: val, child: Text(val))).toList(),
+                                    onChanged: (nuevoVal) {
+                                      setStateModal(() => prioridadSel = nuevoVal!);
+                                    },
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 30),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: ElevatedButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF90A48E), padding: const EdgeInsets.symmetric(vertical: 15)),
+                                      child: const Text('Cancelar', style: TextStyle(color: Colors.white)),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 15),
+                                  Expanded(
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        int nuevaPrio = 5;
+                                        if (prioridadSel == 'Crítica') nuevaPrio = 1;
+                                        if (prioridadSel == 'Alta') nuevaPrio = 2;
+                                        if (prioridadSel == 'Media') nuevaPrio = 3;
+                                        if (prioridadSel == 'Baja') nuevaPrio = 4;
+                                        _enviarEdicion(ticket['_id'], nombreCtrl.text, probCtrl.text, nuevaPrio);
+                                      },
+                                      style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryColor, padding: const EdgeInsets.symmetric(vertical: 15)),
+                                      child: const Text('Guardar', style: TextStyle(color: Colors.white)),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           );
@@ -228,7 +309,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
 
-  
+
 
   void _mostrarModalExitoEdicion() {
     showDialog(

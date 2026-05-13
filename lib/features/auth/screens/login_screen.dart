@@ -190,7 +190,21 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       Image.asset('assets/logos/google_logo.png', height: 30),
                       const SizedBox(width: 30),
-                      Image.asset('assets/logos/facebook_logo.png', height: 30),
+                      GestureDetector(
+  onTap: () {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Próximamente'),
+        content: const Text('El inicio de sesión con Facebook estará disponible en versiones futuras.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Aceptar')),
+        ],
+      ),
+    );
+  },
+  child: Image.asset('assets/logos/facebook_logo.png', height: 30),
+),
                     ],
                   ),
                 ],

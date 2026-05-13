@@ -4,6 +4,7 @@ import 'dart:convert';
 import '../../../core/theme/app_theme.dart';
 import '../../auth/screens/login_screen.dart'; // Ajusta la ruta a tu Login
 import '../../profile/screens/profile_screen.dart'; // El archivo que crearemos abajo
+import '../../help_center/screens/help_center_screen.dart'; // Ajusta la ruta según dónde la guardaste
 
 class CustomDrawer extends StatefulWidget {
   const CustomDrawer({Key? key}) : super(key: key);
@@ -89,7 +90,11 @@ class _CustomDrawerState extends State<CustomDrawer> {
               }),
               const SizedBox(height: 15),
               _buildMenuButton('Centro de Ayuda', () {
-                // Aquí irá la pantalla de ayuda después
+                Navigator.pop(context); // Cierra el menú lateral primero
+                Navigator.push(
+                  context, 
+                  MaterialPageRoute(builder: (context) => const HelpCenterScreen()) // <-- ¡Abre el diseño de Stefany!
+                );
               }),
 
               const Spacer(), // Empuja el botón de cerrar sesión hasta abajo
