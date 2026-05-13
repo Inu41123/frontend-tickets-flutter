@@ -25,7 +25,7 @@ class GoogleAuthService {
 
       // 5. ¡Le pegamos a tu API de Node.js!
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:3005/usuarios/google-login'),
+        Uri.parse('https://backend-tickets-flutter.onrender.com/usuarios/google-login'),  
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'token': googleAuth.idToken,

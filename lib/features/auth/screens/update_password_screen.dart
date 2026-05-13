@@ -101,7 +101,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> with Single
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:3005/usuarios/restablecer-password'),
+        Uri.parse('https://backend-tickets-flutter.onrender.com/usuarios/restablecer-password'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'correo': widget.email,

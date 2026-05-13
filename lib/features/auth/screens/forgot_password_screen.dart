@@ -69,7 +69,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> with Single
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:3005/usuarios/solicitar-codigo'),
+        Uri.parse('https://backend-tickets-flutter.onrender.com/usuarios/solicitar-codigo'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'correo': email}),
       );

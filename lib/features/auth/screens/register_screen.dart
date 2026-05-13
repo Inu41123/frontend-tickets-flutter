@@ -98,7 +98,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       String nombreCompleto = '${_nombreController.text.trim()} ${_apellidosController.text.trim()}';
 
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:3005/usuarios/registro'),
+        Uri.parse('https://backend-tickets-flutter.onrender.com/usuarios/registro'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'nombreCompleto': nombreCompleto,
@@ -293,8 +293,8 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         suffixIcon: suffixIcon,
         obscureText: obscureText,
         keyboardType: keyboardType,
-        controller: controller
-        //onSuffixTap: onSuffixTap,
+        controller: controller,
+        onSuffixTap: onSuffixTap
       ),
     );
   }
@@ -311,38 +311,26 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
               children: [
                 // Los engranajes con animación de rotación suave
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TweenAnimationBuilder(
-                      duration: const Duration(seconds: 20),
-                      tween: Tween<double>(begin: 0, end: 360),
-                      builder: (context, double angle, child) {
-                        return Transform.rotate(
-                          angle: angle * 3.14159 / 180 * 0.3,
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 40.0),
-                            child: Image.asset('assets/images/engrane_izq.png', width: 100),
-                          ),
-                        );
-                      },
-                    ),
-                    TweenAnimationBuilder(
-                      duration: const Duration(seconds: 25),
-                      tween: Tween<double>(begin: 0, end: 360),
-                      builder: (context, double angle, child) {
-                        return Transform.rotate(
-                          angle: angle * 3.14159 / 180 * -0.2,
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 20.0),
-                            child: Image.asset('assets/images/engrane_der.png', width: 220),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
+  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    Padding(
+      padding: const EdgeInsets.only(top: 40.0),
+      child: Image.asset(
+        'assets/images/engrane_izq.png',
+        width: 100,
+      ),
+    ),
 
+    Padding(
+      padding: const EdgeInsets.only(top: 20.0),
+      child: Image.asset(
+        'assets/images/engrane_der.png',
+        width: 220,
+      ),
+    ),
+  ],
+),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 30.0),
                   child: Column(

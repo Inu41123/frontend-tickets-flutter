@@ -81,7 +81,7 @@ Sigue estos pasos para desplegar el entorno en tu máquina local:
 3. **Configurar IP del backend (Importante para emuladores)**
    Si tu backend en Node.js corre en local (puerto `3005`) y estás probando en el **emulador de Android**, recuerda que `localhost` no funciona. Debes apuntar a la IP especial del emulador:
    ```text
-   http://10.0.2.2:3005
+   https://backend-tickets-flutter.onrender.com
    ```
    *Para dispositivos físicos o iOS, utiliza la IP real de tu máquina en la red local (ej. `192.168.1.X`).*
 

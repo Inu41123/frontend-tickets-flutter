@@ -104,7 +104,7 @@ class _AddTicketScreenState extends State<AddTicketScreen> with SingleTickerProv
       }
 
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:3005/tickets'),
+        Uri.parse('https://backend-tickets-flutter.onrender.com/tickets'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',

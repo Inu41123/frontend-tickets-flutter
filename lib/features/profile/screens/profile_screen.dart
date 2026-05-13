@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // <-- IMPORTANTE: Librería de Firebase
 
-// --- IMPORTACIONES ARREGLADAS (Apuntando a help_center como te diste cuenta) ---
 import '../../help_center/utils/app_colors.dart';
 import '../../help_center/widgets/app_logo.dart';
 import '../../help_center/widgets/rotating_gear.dart'; 
@@ -23,6 +23,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _correo = '';
   String _rol = '';
   String _telefono = 'No registrado';
+  bool _telefonoVerificado = false; // <-- Nuevo estado para saber si ya se verificó
   String _calle = '';
   String _colonia = '';
   String _direccionCompleta = 'No registrada';
@@ -33,14 +34,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _obtenerDatosPerfil();
   }
 
-  // --- 1. LÓGICA DEL BACKEND (Intacta) ---
+  // --- 1. LÓGICA DEL BACKEND ---
   Future<void> _obtenerDatosPerfil() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
 
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:3005/usuarios/perfil'),
+        Uri.parse('https://backend-tickets-flutter.onrender.com/usuarios/perfil'),
         headers: {'Authorization': 'Bearer $token'},
       );
 
@@ -57,6 +58,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           
           _telefono = telefonoData['numero'] == '0000000000' || telefonoData['numero'] == null 
               ? 'No registrado' : telefonoData['numero'];
+          
+          // Leer si está verificado de la base de datos
+          _telefonoVerificado = telefonoData['numeroVerificado'] ?? false;
               
           _calle = direccionData['calle'] ?? '';
           _colonia = direccionData['colonia'] ?? '';
@@ -83,7 +87,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final token = prefs.getString('token');
 
       final response = await http.put(
-        Uri.parse('http://10.0.2.2:3005/usuarios/perfil'),
+        Uri.parse('https://backend-tickets-flutter.onrender.com/usuarios/perfil'),
         headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
         body: jsonEncode({
           'nombreCompleto': nuevoNombre, 'telefono': nuevoTel, 'calle': nuevaCalle, 'colonia': nuevaColonia
@@ -120,7 +124,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       final response = await http.delete(
-        Uri.parse('http://10.0.2.2:3005/usuarios/eliminar-cuenta'),
+        Uri.parse('https://backend-tickets-flutter.onrender.com/usuarios/eliminar-cuenta'),
         headers: {'Authorization': 'Bearer $token'},
       );
 
@@ -133,7 +137,99 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } catch (e) {}
   }
 
-  // --- 2. MODAL DE EDICIÓN (Adaptado al diseño verde) ---
+  // ==========================================
+  // LÓGICA FIREBASE SMS (ANTIGRAVITY MODE XD)
+  // ==========================================
+  Future<void> _iniciarVerificacionSms() async {
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Enviando código SMS...'), duration: Duration(seconds: 2)));
+    
+    // Le agregamos el +52 automático para que Firebase entienda que es de México
+    String numeroFormateado = _telefono.startsWith('+') ? _telefono : '+52$_telefono';
+
+    await FirebaseAuth.instance.verifyPhoneNumber(
+      phoneNumber: numeroFormateado,
+      verificationCompleted: (PhoneAuthCredential credential) async {
+        // En algunos Android, Firebase lee el SMS solo y hace esto automático
+        await FirebaseAuth.instance.signInWithCredential(credential);
+        _avisarBackendTelefonoVerificado();
+      },
+      verificationFailed: (FirebaseAuthException e) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error enviando SMS: ${e.message}'), backgroundColor: Colors.red));
+      },
+      codeSent: (String verificationId, int? resendToken) {
+        // El SMS ya salió, abrimos el modal para que ponga el código
+        _mostrarModalIngresarSms(verificationId);
+      },
+      codeAutoRetrievalTimeout: (String verificationId) {},
+    );
+  }
+
+  void _mostrarModalIngresarSms(String verificationId) {
+    TextEditingController smsCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Ingresa el código SMS'),
+        content: TextField(
+          controller: smsCtrl,
+          keyboardType: TextInputType.number,
+          maxLength: 6,
+          decoration: const InputDecoration(hintText: 'Ej: 123456'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+          ElevatedButton(
+            onPressed: () async {
+              try {
+                // Armamos la credencial con el código que tecleó
+                PhoneAuthCredential credential = PhoneAuthProvider.credential(
+                  verificationId: verificationId,
+                  smsCode: smsCtrl.text,
+                );
+                // Le decimos a Firebase que valide
+                await FirebaseAuth.instance.signInWithCredential(credential);
+                
+                if (mounted) {
+                  Navigator.pop(context); // Cierra modal
+                  _avisarBackendTelefonoVerificado();
+                }
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Código incorrecto'), backgroundColor: Colors.red));
+              }
+            },
+            child: const Text('Verificar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _avisarBackendTelefonoVerificado() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      // Le pegamos a la ruta que me armaste en el userController
+      final response = await http.post(
+        Uri.parse('https://backend-tickets-flutter.onrender.com/usuarios/verificar-telefono'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        setState(() => _telefonoVerificado = true);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('¡Teléfono verificado con éxito!'), backgroundColor: Colors.green));
+        }
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error al guardar en el servidor'), backgroundColor: Colors.red));
+    }
+  }
+
+
+  // --- 2. MODAL DE EDICIÓN ---
   void _mostrarModalEditar() {
     TextEditingController nombreCtrl = TextEditingController(text: _nombre);
     TextEditingController telCtrl = TextEditingController(text: _telefono == 'No registrado' ? '' : _telefono);
@@ -165,8 +261,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         const Text('Nombre:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)), const SizedBox(height: 5),
                         TextField(controller: nombreCtrl, decoration: InputDecoration(filled: true, fillColor: const Color(0xFFE8EEDF), border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none), contentPadding: const EdgeInsets.symmetric(horizontal: 15))),
                         const SizedBox(height: 15),
-                        const Text('Teléfono:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)), const SizedBox(height: 5),
-                        TextField(controller: telCtrl, keyboardType: TextInputType.phone, decoration: InputDecoration(filled: true, fillColor: const Color(0xFFE8EEDF), border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none), contentPadding: const EdgeInsets.symmetric(horizontal: 15))),
+                        const Text('Teléfono (10 dígitos):', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)), const SizedBox(height: 5),
+                        TextField(controller: telCtrl, keyboardType: TextInputType.phone, maxLength: 10, decoration: InputDecoration(counterText: "", filled: true, fillColor: const Color(0xFFE8EEDF), border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none), contentPadding: const EdgeInsets.symmetric(horizontal: 15))),
                         const SizedBox(height: 15),
                         const Text('Calle y Número:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)), const SizedBox(height: 5),
                         TextField(controller: calleCtrl, decoration: InputDecoration(filled: true, fillColor: const Color(0xFFE8EEDF), border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none), contentPadding: const EdgeInsets.symmetric(horizontal: 15))),
@@ -193,11 +289,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // --- 3. UI CON EL DISEÑO DE STEFANY PERO DATOS DINÁMICOS ---
+  // --- 3. UI CON EL DISEÑO DE STEFANY ---
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.fondo, // Usando AppColors
+      backgroundColor: AppColors.fondo,
       body: SafeArea(
         child: _isLoading 
         ? const Center(child: CircularProgressIndicator())
@@ -208,7 +304,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Column(
               children: [
                 const SizedBox(height: 18),
-                const Center(child: AppLogo(height: 42)), // Usando AppLogo
+                const Center(child: AppLogo(height: 42)), 
                 const SizedBox(height: 16),
 
                 Container(
@@ -238,7 +334,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           const SizedBox(height: 30),
 
-                          // DATOS CONECTADOS AL BACKEND
                           const Text('Nombre:', style: TextStyle(fontSize: 14, color: Colors.black54)),
                           const SizedBox(height: 4),
                           Text(_nombre, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.black)),
@@ -251,7 +346,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           const SizedBox(height: 20),
                           const Text('Teléfono:', style: TextStyle(fontSize: 14, color: Colors.black54)),
                           const SizedBox(height: 4),
-                          Text(_telefono, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.black)),
+                          
+                          // ===============================================
+                          // EL DATO DEL TELÉFONO CON SU BOTÓN DE VERIFICAR
+                          // ===============================================
+                          Row(
+                            children: [
+                              Text(_telefono, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.black)),
+                              const SizedBox(width: 10),
+                              
+                              if (_telefono != 'No registrado' && !_telefonoVerificado)
+                                GestureDetector(
+                                  onTap: _iniciarVerificacionSms,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(color: const Color(0xFFFF5D5D), borderRadius: BorderRadius.circular(10)),
+                                    child: const Text('Verificar', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                                  ),
+                                ),
+                                
+                              if (_telefonoVerificado)
+                                const Icon(Icons.verified, color: Colors.green, size: 22),
+                            ],
+                          ),
 
                           const SizedBox(height: 20),
                           const Text('Dirección:', style: TextStyle(fontSize: 14, color: Colors.black54)),
@@ -260,17 +377,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                           const SizedBox(height: 40),
 
-                          // BOTONES CONECTADOS
                           ProfileButton(
                             text: 'Editar Datos',
                             color: const Color(0xFFF4D74D),
-                            onTap: _mostrarModalEditar, // Llama a tu función
+                            onTap: _mostrarModalEditar, 
                           ),
                           const SizedBox(height: 18),
                           ProfileButton(
                             text: 'Eliminar Cuenta',
                             color: const Color(0xFFFF5D5D),
-                            onTap: _eliminarCuenta, // Llama a tu función
+                            onTap: _eliminarCuenta, 
                           ),
                           const SizedBox(height: 40),
                         ],

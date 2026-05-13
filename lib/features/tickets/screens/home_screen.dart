@@ -88,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
 
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:3005/tickets'),
+        Uri.parse('https://backend-tickets-flutter.onrender.com/tickets'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -118,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       final response = await http.put(
-        Uri.parse('http://10.0.2.2:3005/tickets/$idTicket/status'),
+        Uri.parse('https://backend-tickets-flutter.onrender.com/tickets/$idTicket/status'),
         headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
         body: jsonEncode({'estado': !estadoActual}), 
       );
@@ -133,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       final response = await http.put(
-        Uri.parse('http://10.0.2.2:3005/tickets/$idTicket'),
+        Uri.parse('https://backend-tickets-flutter.onrender.com/tickets/$idTicket'),
         headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
         body: jsonEncode({'nombre': nombre, 'problema': problema, 'prioridad': prioridad}),
       );
@@ -349,7 +349,7 @@ void _mostrarModalEditar(dynamic ticket) {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
-      final response = await http.delete(Uri.parse('http://10.0.2.2:3005/tickets/$idTicket'), headers: {'Authorization': 'Bearer $token'});
+      final response = await http.delete(Uri.parse('https://backend-tickets-flutter.onrender.com/tickets/$idTicket'), headers: {'Authorization': 'Bearer $token'});
       if (response.statusCode == 200) _obtenerTickets(); 
       else setState(() => _isLoading = false);
     } catch (e) { setState(() => _isLoading = false); }

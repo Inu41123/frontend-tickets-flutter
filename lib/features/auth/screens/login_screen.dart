@@ -86,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:3005/usuarios/login'),
+        Uri.parse('https://backend-tickets-flutter.onrender.com/usuarios/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'correo': _emailController.text.trim(),
@@ -232,38 +232,35 @@ width: isLoading ? 60 : MediaQuery.of(context).size.width,
             child: Column(
               children: [
                 // 1. LOS DOS ENGRANAJES (con animación de rotación suave)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TweenAnimationBuilder(
-                      duration: const Duration(seconds: 20),
-                      tween: Tween<double>(begin: 0, end: 360),
-                      builder: (context, double angle, child) {
-                        return Transform.rotate(
-                          angle: angle * 3.14159 / 180 * 0.3,
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 50.0),
-                            child: Image.asset('assets/images/engrane_izq.png', width: 100),
-                          ),
-                        );
-                      },
-                    ),
-                    TweenAnimationBuilder(
-                      duration: const Duration(seconds: 25),
-                      tween: Tween<double>(begin: 0, end: 360),
-                      builder: (context, double angle, child) {
-                        return Transform.rotate(
-                          angle: angle * 3.14159 / 180 * -0.2,
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 20.0),
-                            child: Image.asset('assets/images/engrane_der.png', width: 220),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
+              SizedBox(
+  height: 220,
+  child: Stack(
+    clipBehavior: Clip.none,
+    children: [
+      Positioned(
+        top: 70,
+        left: -40,
+        child: Image.asset(
+          'assets/images/engrane_izq.png',
+          width: 170,
+          height: 170,
+          fit: BoxFit.contain,
+        ),
+      ),
+
+      Positioned(
+        top: -35,
+        right: 1,
+        child: Image.asset(
+          'assets/images/engrane_der.png',
+          width: 233,
+          height: 233,
+          fit: BoxFit.contain,
+        ),
+      ),
+    ],
+  ),
+),
 
                 Padding(
                   padding: const EdgeInsets.all(30.0),
@@ -450,38 +447,43 @@ width: isLoading ? 60 : MediaQuery.of(context).size.width,
 
   // Campo de contraseña animado con toggle
   Widget _buildAnimatedPasswordField() {
-    return TweenAnimationBuilder(
-      duration: const Duration(milliseconds: 500),
-      tween: Tween<double>(begin: 0, end: 1),
-      curve: Curves.easeOut,
-      builder: (context, double value, child) {
-        return Transform.translate(
-          offset: Offset(0, 20 * (1 - value)),
-          child: Opacity(opacity: value, child: child),
-        );
-      },
-      child: StatefulBuilder(
-        builder: (context, setStatePassword) {
-          return GestureDetector(
-            onTap: () => setStatePassword(() {}),
-            child: CustomAuthTextField(
-              label: 'Contraseña',
-              prefixIcon: Icons.lock_outline,
-              suffixIcon: _showPassword ? Icons.visibility : Icons.visibility_off,
-              obscureText: !_showPassword,
-              controller: _passwordController,
-              //final VoidCallback? onSuffixTap
-              
-              // onSuffixTap: () {
-              //  setState(() => _showPassword = !_showPassword);
-              //},
-            ),
-          );
-        },
-      ),
-    );
-  }
+  return TweenAnimationBuilder(
+    duration: const Duration(milliseconds: 500),
+    tween: Tween<double>(begin: 0, end: 1),
+    curve: Curves.easeOut,
+    builder: (context, double value, child) {
+      return Transform.translate(
+        offset: Offset(0, 20 * (1 - value)),
+        child: Opacity(
+          opacity: value,
+          child: child,
+        ),
+      );
+    },
 
+    child: CustomAuthTextField(
+      label: 'Contraseña',
+      prefixIcon: Icons.lock_outline,
+
+      // CAMBIA EL ICONO
+      suffixIcon: _showPassword
+          ? Icons.visibility
+          : Icons.visibility_off,
+
+      // MUESTRA / OCULTA
+      obscureText: !_showPassword,
+
+      controller: _passwordController,
+
+      // FUNCIONA EL OJITO
+      onSuffixTap: () {
+        setState(() {
+          _showPassword = !_showPassword;
+        });
+      },
+    ),
+  );
+}
   // Botón social animado
   Widget _buildAnimatedSocialButton({
     required VoidCallback? onTap,

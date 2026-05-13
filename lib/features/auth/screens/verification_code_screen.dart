@@ -84,7 +84,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> with Si
     if (widget.isForRegistration) {
       try {
         final response = await http.post(
-          Uri.parse('http://10.0.2.2:3005/usuarios/verificar-cuenta'),
+          Uri.parse('https://backend-tickets-flutter.onrender.com/usuarios/verificar-cuenta'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
             'correo': widget.email,
@@ -146,7 +146,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> with Si
     
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:3005/usuarios/reenviar-codigo'),
+        Uri.parse('https://backend-tickets-flutter.onrender.com/usuarios/reenviar-codigo'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'correo': widget.email,
