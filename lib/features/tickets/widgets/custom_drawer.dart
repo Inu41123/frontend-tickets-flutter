@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import '../../../core/theme/app_theme.dart';
-import '../../auth/screens/login_screen.dart'; // Ajusta la ruta a tu Login
-import '../../profile/screens/profile_screen.dart'; // El archivo que crearemos abajo
-import '../../help_center/screens/help_center_screen.dart'; // Ajusta la ruta según dónde la guardaste
+
+// --- IMPORTACIONES DE LOS WIDGETS DE STEFANY ---
+import '../../help_center/utils/app_colors.dart';
+import '../../help_center/widgets/app_logo.dart';
+import '../../help_center/widgets/buttons.dart'; 
+
+import '../../auth/screens/login_screen.dart'; 
+import '../../profile/screens/profile_screen.dart'; 
+import '../../help_center/screens/help_center_screen.dart'; 
 
 class CustomDrawer extends StatefulWidget {
   const CustomDrawer({Key? key}) : super(key: key);
@@ -22,7 +27,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
     _cargarDatosUsuario();
   }
 
-  // Sacamos el nombre directamente del Token guardado
+  // LÓGICA INTACTA: Sacamos el nombre del Token
   Future<void> _cargarDatosUsuario() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
@@ -38,15 +43,16 @@ class _CustomDrawerState extends State<CustomDrawer> {
     }
   }
 
+  // LÓGICA INTACTA: Cerrar sesión real
   Future<void> _cerrarSesion(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('token'); // Borramos el token de la memoria
+    await prefs.remove('token'); 
     
     if (context.mounted) {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const LoginScreen()),
-        (Route<dynamic> route) => false, // Destruye todas las pantallas anteriores
+        (Route<dynamic> route) => false, 
       );
     }
   }
@@ -54,88 +60,149 @@ class _CustomDrawerState extends State<CustomDrawer> {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: AppTheme.backgroundColor,
-      child: Stack(
-        children: [
-          // FONDO: Engranajes
-          Positioned(top: 150, left: -50, child: Opacity(opacity: 0.3, child: Image.asset('assets/images/engrane_izq.png', width: 200))),
-          Positioned(bottom: 100, left: -50, child: Opacity(opacity: 0.3, child: Image.asset('assets/images/engrane_izq.png', width: 200))),
-          //Positioned(bottom: 170, right: -50, child: Opacity(opacity: 0.4, child: Image.asset('assets/images/.png', width: 200))),
-          //Positioned(bottom: 100, right: -50, child: Opacity(opacity: 0.4, child: Image.asset('assets/images/engranaje_abajo_menuH.png', width: 100))),
-
-          // CONTENIDO DEL MENÚ
-          Column(
-            children: [
-              // Header del Menú
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.only(top: 60, bottom: 20, left: 20, right: 20),
-                decoration: const BoxDecoration(color: Color(0xFFE8EDE6)), // Verde clarito
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(child: Text(nombreUsuario, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
-                    const CircleAvatar(
-                      backgroundColor: Colors.white,
-                      radius: 25,
-                      child: Icon(Icons.person_outline, size: 30, color: Colors.black),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 40),
-
-              // Botones del menú
-              _buildMenuButton('Perfil', () {
-                Navigator.pop(context); // Cierra el menú
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileScreen()));
-              }),
-              const SizedBox(height: 15),
-              _buildMenuButton('Centro de Ayuda', () {
-                Navigator.pop(context); // Cierra el menú lateral primero
-                Navigator.push(
-                  context, 
-                  MaterialPageRoute(builder: (context) => const HelpCenterScreen()) // <-- ¡Abre el diseño de Stefany!
-                );
-              }),
-
-              const Spacer(), // Empuja el botón de cerrar sesión hasta abajo
-
-              // Botón Cerrar Sesión
-              Padding(
-                padding: const EdgeInsets.only(bottom: 40),
-                child: ElevatedButton(
-                  onPressed: () => _cerrarSesion(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFFF5C5C),
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      width: 255, // Stefany le puso exactamente 255 de ancho en su diseño
+      backgroundColor: AppColors.fondo,
+      child: SafeArea(
+        child: Stack(
+          children: [
+            // LOS ENGRANAJES DE FONDO DE STEFANY
+            const MenuGears(),
+            
+            Column(
+              children: [
+                // HEADER CON LOGO
+                Container(
+                  height: 78,
+                  padding: const EdgeInsets.symmetric(horizontal: 25),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context), // Cierra el menú al tocar el icono
+                        child: const Icon(Icons.menu, size: 28),
+                      ),
+                      const SizedBox(width: 14),
+                      const AppLogo(height: 28),
+                    ],
                   ),
-                  child: const Text('Cerrar Sesión', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
-              )
-            ],
-          ),
-        ],
+                
+                // BARRA CON NOMBRE DE USUARIO Y AVATAR
+                Container(
+                  height: 56,
+                  color: AppColors.verdeClaro,
+                  child: Row(
+                    children: [
+                      const SizedBox(width: 20),
+                      Expanded(
+                        child: Text(
+                          nombreUsuario, // <-- DATO DINÁMICO DEL BACKEND
+                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
+                        },
+                        child: const CircleAvatar(
+                          radius: 21,
+                          backgroundColor: Color(0xFFE6E6E6),
+                          child: Icon(Icons.person_outline, color: Colors.black),
+                        ),
+                      ),
+                      const SizedBox(width: 18),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 82),
+
+                // BOTONES ANIMADOS DE STEFANY CONECTADOS A TUS RUTAS
+                SizedBox(
+                  width: 170,
+                  child: MainButton(
+                    text: 'Perfil',
+                    color: const Color(0xFFD6E6B5),
+                    textColor: AppColors.texto,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
+                    },
+                  ),
+                ),
+                const SizedBox(height: 18),
+                
+                SizedBox(
+                  width: 170,
+                  child: MainButton(
+                    text: 'Centro de Ayuda',
+                    color: const Color(0xFFD6E6B5),
+                    textColor: AppColors.texto,
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const HelpCenterScreen()));
+                    },
+                  ),
+                ),
+                
+                const Spacer(),
+                
+                // BOTÓN ROJO PARA CERRAR SESIÓN
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 55),
+                  child: SizedBox(
+                    width: 145,
+                    child: MainButton(
+                      text: 'Cerrar Sesión',
+                      color: AppColors.rojo,
+                      onTap: () => _cerrarSesion(context), // <-- CONECTADO A TU LÓGICA
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
+}
 
-  // Mini-widget para hacer los botones verdes del menú
-  Widget _buildMenuButton(String title, VoidCallback onPressed) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40),
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFD3E0C8), // Verde pastel del diseño
-          foregroundColor: Colors.black,
-          minimumSize: const Size(double.infinity, 45),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          elevation: 0,
+// COPIA EXACTA DE LOS ENGRANAJES DE STEFANY
+class MenuGears extends StatelessWidget {
+  const MenuGears({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Positioned(
+          right: -55,
+          top: 160,
+          child: Icon(Icons.settings, size: 150, color: AppColors.texto.withOpacity(.70)),
         ),
-        child: Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-      ),
+        const Positioned(
+          left: -70,
+          top: 330,
+          child: Icon(Icons.settings, size: 145, color: Color(0xFFDDE9DE)),
+        ),
+        const Positioned(
+          right: -38,
+          top: 450,
+          child: Icon(Icons.settings, size: 110, color: Color(0xFFBFD8D0)),
+        ),
+        const Positioned(
+          left: -20,
+          bottom: 120,
+          child: Icon(Icons.settings, size: 70, color: Color(0xFFD8E8D4)),
+        ),
+        Positioned(
+          right: -45,
+          bottom: -10,
+          child: Icon(Icons.settings, size: 170, color: AppColors.texto.withOpacity(.75)),
+        ),
+      ],
     );
   }
 }

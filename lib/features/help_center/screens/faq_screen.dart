@@ -95,7 +95,11 @@ class FAQHeader extends StatelessWidget {
             const SizedBox(width: 26),
             GestureDetector(
               onTap: () => Navigator.pop(context),
-              child: const Icon(Icons.arrow_back, size: 34),
+              child: const Icon(
+                Icons.arrow_back,
+                size: 34,
+                color: Colors.black,
+              ),
             ),
             const Expanded(
               child: Center(
@@ -178,7 +182,11 @@ class _FAQCardState extends State<FAQCard>
                     children: [
                       Row(
                         children: [
-                          Icon(widget.item.icon, size: 24),
+                          Icon(
+                            widget.item.icon,
+                            size: 24,
+                            color: Colors.black,
+                          ),
                           const SizedBox(width: 14),
                           Expanded(
                             child: Text(
@@ -201,14 +209,18 @@ class _FAQCardState extends State<FAQCard>
                           color: AppColors.texto.withOpacity(.65),
                         ),
                         const SizedBox(height: 12),
-                        Text(
-                          widget.item.respuesta,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: AppColors.texto,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            height: 1.2,
+                        AnimatedOpacity(
+                          duration: const Duration(milliseconds: 220),
+                          opacity: isOpen ? 1 : 0,
+                          child: Text(
+                            widget.item.respuesta,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: AppColors.texto,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              height: 1.2,
+                            ),
                           ),
                         ),
                       ],

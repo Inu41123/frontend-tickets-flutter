@@ -1,6 +1,10 @@
+
 import 'package:flutter/material.dart';
+
 import '../utils/app_colors.dart';
 import '../widgets/app_logo.dart';
+import '../widgets/rotating_gear.dart';
+
 import 'faq_screen.dart';
 import 'guide_screen.dart';
 import 'privacy_screen.dart';
@@ -12,77 +16,78 @@ class HelpCenterScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.fondo,
+
       body: SafeArea(
         child: Stack(
           children: [
             const HelpGears(),
+
             Column(
               children: [
-                Container(
-                  height: 72,
-                  color: AppColors.fondo,
-                  alignment: Alignment.center,
-                  child: const AppLogo(height: 34),
+                const SizedBox(height: 16),
+
+                const Center(
+                  child: AppLogo(height: 40),
                 ),
+
+                const SizedBox(height: 14),
+
                 Container(
-                  height: 112,
-                  color: AppColors.verde,
-                  child: Row(
-                    children: [
-                      const SizedBox(width: 28),
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: const Icon(
-                          Icons.arrow_back,
-                          size: 34,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
+                  width: double.infinity,
+                  height: 96,
+                  color: const Color(0xFFA8BBB0),
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.only(left: 28),
+                  child: GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: const Icon(
+                      Icons.arrow_back,
+                      size: 38,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 118),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30),
-                  child: Column(
-                    children: [
-                      HelpButton(
-                        text: 'Preguntas frecuentes',
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const FAQScreen(),
-                            ),
-                          );
-                        },
+
+                const SizedBox(height: 90),
+
+                HelpButton(
+                  text: 'Preguntas frecuentes',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const FAQScreen(),
                       ),
-                      const SizedBox(height: 16),
-                      HelpButton(
-                        text: 'Guía paso a paso',
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const GuideScreen(),
-                            ),
-                          );
-                        },
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 20),
+
+                HelpButton(
+                  text: 'Guía paso a paso',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const GuideScreen(),
                       ),
-                      const SizedBox(height: 16),
-                      HelpButton(
-                        text: 'Políticas de privacidad',
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const PrivacyScreen(),
-                            ),
-                          );
-                        },
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 20),
+
+                HelpButton(
+                  text: 'Políticas de privacidad',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const PrivacyScreen(),
                       ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -105,27 +110,34 @@ class HelpButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      elevation: 4,
-      shadowColor: Colors.black38,
-      borderRadius: BorderRadius.circular(7),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(7),
-        onTap: onTap,
-        child: Container(
-          height: 42,
-          width: double.infinity,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: AppColors.verdeClaro,
-            borderRadius: BorderRadius.circular(7),
-          ),
+    return GestureDetector(
+      onTap: onTap,
+
+      child: Container(
+        width: 330,
+        height: 58,
+
+        decoration: BoxDecoration(
+          color: const Color(0xFFE8EEE0),
+
+          borderRadius: BorderRadius.circular(12),
+
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(.18),
+              blurRadius: 7,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+
+        child: Center(
           child: Text(
             text,
             style: const TextStyle(
               color: AppColors.texto,
+              fontSize: 18,
               fontWeight: FontWeight.w900,
-              fontSize: 17,
             ),
           ),
         ),
@@ -142,48 +154,38 @@ class HelpGears extends StatelessWidget {
     return Stack(
       children: [
         Positioned(
-          right: -50,
-          top: 235,
-          child: Icon(
-            Icons.settings,
-            size: 145,
-            color: AppColors.texto.withOpacity(.72),
+          right: -40,
+          top: 255,
+          child: RotatingGear(
+            size: 120,
+            color: AppColors.texto.withOpacity(.70),
           ),
         ),
+
         Positioned(
-          left: -75,
-          top: 390,
-          child: Icon(
-            Icons.settings,
+          left: -70,
+          top: 420,
+          child: RotatingGear(
             size: 150,
-            color: const Color(0xFFDDE9DE).withOpacity(.8),
+            color: const Color(0xFFE6F0E4).withOpacity(.85),
           ),
         ),
+
         Positioned(
-          right: -45,
-          bottom: 145,
-          child: Icon(
-            Icons.settings,
-            size: 105,
-            color: const Color(0xFFBFD8D0).withOpacity(.9),
+          right: -35,
+          bottom: 135,
+          child: RotatingGear(
+            size: 110,
+            color: const Color(0xFFC7DDD6).withOpacity(.95),
           ),
         ),
+
         Positioned(
-          left: -22,
-          bottom: 125,
-          child: Icon(
-            Icons.settings,
+          left: -18,
+          bottom: 55,
+          child: RotatingGear(
             size: 72,
-            color: const Color(0xFFD8E8D4).withOpacity(.9),
-          ),
-        ),
-        Positioned(
-          right: -45,
-          bottom: -38,
-          child: Icon(
-            Icons.settings,
-            size: 178,
-            color: AppColors.texto.withOpacity(.75),
+            color: const Color(0xFFD9E8D3).withOpacity(.90),
           ),
         ),
       ],
