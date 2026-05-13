@@ -4,6 +4,10 @@ import 'package:http/http.dart' as http;
 import '../../../core/theme/app_theme.dart';
 import '../widgets/custom_text_field.dart';
 import 'verification_code_screen.dart'; // Importamos la pantalla del código
+import '../services/google_auth_service.dart';
+import '../../tickets/screens/home_screen.dart';
+
+
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -193,8 +197,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Image.asset('assets/logos/google_logo.png', height: 30),
+
+
+GestureDetector(
+      onTap: () async {
+        // Mostramos un indicador de carga opcional (UX)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Conectando con Google...')),
+        );
+        
+        // Llamamos a nuestro servicio
+        bool exito = await GoogleAuthService().signInWithGoogle();
+        
+        if (exito && context.mounted) {
+          // Si jala, ¡para adentro!
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeScreen()));
+        } else if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Error al iniciar sesión con Google'), backgroundColor: Colors.red),
+          );
+        }
+      },
+      child: Image.asset('assets/logos/google_logo.png', height: 30),
+    ),
+                      
+
                       const SizedBox(width: 30),
+
+
                       GestureDetector(
   onTap: () {
     showDialog(

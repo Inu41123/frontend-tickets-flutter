@@ -120,7 +120,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
 
           Align(
             alignment: Alignment.bottomRight,
-            child: Image.asset('assets/images/engrane_abajo.png', width: 150),
+            child: Image.asset('assets/images/en_login_abajo.png', width: 150),
           ),
         ],
       ),

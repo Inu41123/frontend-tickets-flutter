@@ -59,7 +59,9 @@ class _CustomDrawerState extends State<CustomDrawer> {
         children: [
           // FONDO: Engranajes
           Positioned(top: 150, left: -50, child: Opacity(opacity: 0.3, child: Image.asset('assets/images/engrane_izq.png', width: 200))),
-          Positioned(bottom: 100, right: -50, child: Opacity(opacity: 0.4, child: Image.asset('assets/images/engrane_abajo.png', width: 200))),
+          Positioned(bottom: 100, left: -50, child: Opacity(opacity: 0.3, child: Image.asset('assets/images/engrane_izq.png', width: 200))),
+          //Positioned(bottom: 170, right: -50, child: Opacity(opacity: 0.4, child: Image.asset('assets/images/.png', width: 200))),
+          //Positioned(bottom: 100, right: -50, child: Opacity(opacity: 0.4, child: Image.asset('assets/images/engranaje_abajo_menuH.png', width: 100))),
 
           // CONTENIDO DEL MENÚ
           Column(

@@ -78,7 +78,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             children: [
               Padding(
                 padding: const EdgeInsets.only(top: 40.0),
-                child: Image.asset('assets/images/engrane_izq.png', width: 120),
+                child: Image.asset('assets/images/engrane_izq.png', width: 140),
               ),
               Image.asset('assets/images/engrane_der.png', width: 160),
             ],
@@ -113,7 +113,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
           Align(
             alignment: Alignment.bottomRight,
-            child: Image.asset('assets/images/engrane_abajo.png', width: 150),
+            child: Image.asset('assets/images/en_login_abajo.png', width: 150),
           ),
         ],
       ),

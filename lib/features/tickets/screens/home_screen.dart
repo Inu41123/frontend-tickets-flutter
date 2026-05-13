@@ -183,7 +183,7 @@ void _mostrarModalEditar(dynamic ticket) {
                     right: -30, // Se asoma ligeramente
                     child: Opacity(
                       opacity: 0.3, // Muy transparente
-                      child: Image.asset('assets/images/engrane_izq.png', width: 130), // Usamos una versión más pequeña
+                      child: Image.asset('assets/images/eng_dere_arriba_editicket.png', width: 130), // Usamos una versión más pequeña
                     ),
                   ),
 
@@ -193,7 +193,7 @@ void _mostrarModalEditar(dynamic ticket) {
                     right: -20,
                     child: Opacity(
                       opacity: 0.4,
-                      child: Image.asset('assets/images/engrane_abajo.png', width: 150),
+                      child: Image.asset('assets/images/eng_izq_aba_editicket.png', width: 150),
                     ),
                   ),
 
@@ -500,7 +500,7 @@ void _mostrarModalEditar(dynamic ticket) {
       decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(5), boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5, spreadRadius: 1)]),
       child: Row(
         children: [
-          Container(width: 25, height: 165, decoration: BoxDecoration(color: colorPrioridad, borderRadius: const BorderRadius.only(topLeft: Radius.circular(5), bottomLeft: Radius.circular(5)))),
+          Container(width: 25, height: 205, decoration: BoxDecoration(color: colorPrioridad, borderRadius: const BorderRadius.only(topLeft: Radius.circular(5), bottomLeft: Radius.circular(5)))),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(15.0),

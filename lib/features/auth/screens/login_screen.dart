@@ -7,6 +7,7 @@ import 'register_screen.dart';
 import '../../tickets/screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'forgot_password_screen.dart';
+import '../services/google_auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -188,8 +189,30 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Image.asset('assets/logos/google_logo.png', height: 30),
+GestureDetector(
+      onTap: () async {
+        // Mostramos un indicador de carga opcional (UX)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Conectando con Google...')),
+        );
+        
+        // Llamamos a nuestro servicio
+        bool exito = await GoogleAuthService().signInWithGoogle();
+        
+        if (exito && context.mounted) {
+          // Si jala, ¡para adentro!
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const HomeScreen()));
+        } else if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Error al iniciar sesión con Google'), backgroundColor: Colors.red),
+          );
+        }
+      },
+      child: Image.asset('assets/logos/google_logo.png', height: 30),
+    ),
+
                       const SizedBox(width: 30),
+
                       GestureDetector(
   onTap: () {
     showDialog(

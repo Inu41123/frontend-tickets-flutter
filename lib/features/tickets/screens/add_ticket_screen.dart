@@ -174,7 +174,7 @@ Future<void> _enviarTicket() async {
             right: -30,
             child: Opacity(
               opacity: 0.5,
-              child: Image.asset('assets/images/engrane_der.png', width: 150), // Ajusta el nombre de tu imagen
+              child: Image.asset('assets/images/eng_dere_arriba_agregarticket.png', width: 150), // Ajusta el nombre de tu imagen
             ),
           ),
           // FONDO: Engranaje abajo izquierda
@@ -192,7 +192,7 @@ Future<void> _enviarTicket() async {
             right: -40,
             child: Opacity(
               opacity: 0.4,
-              child: Image.asset('assets/images/engrane_abajo.png', width: 180),
+              child: Image.asset('assets/images/eng_dere_abajo_agregarticket.png', width: 180),
             ),
           ),
 

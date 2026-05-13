@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "948566239272",
+    "project_id": "gestiontech-84fa4",
+    "storage_bucket": "gestiontech-84fa4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:948566239272:android:787e6489af56694075ad1d",
+        "android_client_info": {
+          "package_name": "com.example.app_tickets"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "948566239272-fdpehvfefsit9dao56108dqstov3c1dj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.app_tickets",
+            "certificate_hash": "55628c09a2a3ab35c0b300fc8e4eeb99861bd41d"
+          }
+        },
+        {
+          "client_id": "948566239272-93o28lvinjkoni3ov0acqkiqujn6a6c4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkp1UeutKkp7wwmKb2_usoNpFT3bGcS0k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "948566239272-93o28lvinjkoni3ov0acqkiqujn6a6c4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
