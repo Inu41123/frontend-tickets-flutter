@@ -111,8 +111,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // ... (Las funciones _cambiarEstatusTicket, _enviarEdicion, _mostrarModalEditar, _mostrarModalExitoEdicion y _eliminarTicket se quedan EXACTAMENTE igual, no las toqué)
-
   Future<void> _cambiarEstatusTicket(String idTicket, bool estadoActual) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -147,15 +145,40 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+// ==========================================
+  // FUNCIÓN PARA PINTAR EL COLOR DE LA PRIORIDAD
+  // ==========================================
+  Widget _buildPriorityOption(String priority) {
+    Color color;
+    switch (priority) {
+      case 'Crítica': color = const Color(0xFFdc3545); break;
+      case 'Alta': color = const Color(0xFFfd7e14); break;
+      case 'Media': color = const Color(0xFFffc107); break;
+      case 'Baja': color = const Color(0xFF0d6efd); break;
+      case 'Todas': color = Colors.grey; break; // <-- Le agregamos gris al filtro general
+      default: color = const Color(0xFF6dbd58); // Mínima
+    }
+    return Row(
+      children: [
+        Container(width: 12, height: 12, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        const SizedBox(width: 8), 
+        Text(priority),
+      ],
+    );
+  }
 
   // --- FUNCIONES PARA MOSTRAR LOS MODALES DE EDICIÓN ---
+  void _mostrarModalEditar(dynamic ticket) {
+    TextEditingController nombreCtrl =
+        TextEditingController(text: ticket['nombre']);
 
-void _mostrarModalEditar(dynamic ticket) {
-    TextEditingController nombreCtrl = TextEditingController(text: ticket['nombre']);
-    TextEditingController probCtrl = TextEditingController(text: ticket['problema']);
-    
+    TextEditingController probCtrl =
+        TextEditingController(text: ticket['problema']);
+
     int prioridadNum = ticket['prioridad'] ?? 5;
+
     String prioridadSel = 'Mínima';
+
     if (prioridadNum == 1) prioridadSel = 'Crítica';
     if (prioridadNum == 2) prioridadSel = 'Alta';
     if (prioridadNum == 3) prioridadSel = 'Media';
@@ -164,152 +187,307 @@ void _mostrarModalEditar(dynamic ticket) {
     showDialog(
       context: context,
       builder: (context) {
-        return StatefulBuilder(builder: (context, setStateModal) {
-          return Dialog(
-            backgroundColor: Colors.white, // Fondo del diálogo blanco
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            insetPadding: const EdgeInsets.all(20),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              // Ponemos el Stack FUERA del SingleChildScrollView para que los engranajes
-              // se queden fijos mientras el usuario hace scroll en el formulario.
-              child: Stack(
-                children: [
-                  // --- MARCAS DE AGUA (ENGRANAJES) DEL FONDO ---
-                  
-                  // 1. Engranaje hasta arriba a la derecha (abajo del Editar Ticket)
-                  Positioned(
-                    top: 100, // Justo debajo de la cabecera verde (que mide aprox 80)
-                    right: -30, // Se asoma ligeramente
-                    child: Opacity(
-                      opacity: 0.3, // Muy transparente
-                      child: Image.asset('assets/images/eng_dere_arriba_editicket.png', width: 130), // Usamos una versión más pequeña
+        return StatefulBuilder(
+          builder: (context, setStateModal) {
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              insetPadding: const EdgeInsets.all(18),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(22),
+                child: Stack(
+                  children: [
+                    Container(
+                      color: Colors.white,
                     ),
-                  ),
 
-                  // 2. Engranaje abajo a la derecha
-                  Positioned(
-                    bottom: -30, // Se asoma por abajo
-                    right: -20,
-                    child: Opacity(
-                      opacity: 0.4,
-                      child: Image.asset('assets/images/eng_izq_aba_editicket.png', width: 150),
-                    ),
-                  ),
-
-                  // 3. Engranaje en el lado izquierdo por debajo de la prioridad
-                  Positioned(
-                    bottom: 120, // Ajustado para quedar en la zona media-baja izquierda
-                    left: -40, // Se asoma por la izquierda
-                    child: Opacity(
-                      opacity: 0.3,
-                      child: Image.asset('assets/images/engrane_izq.png', width: 180), // Más grande
-                    ),
-                  ),
-
-                  // --- CONTENIDO DEL FORMULARIO (POR ENCIMA DE LOS ENGRANAJES) ---
-                  SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Header Verde (Fijo arriba del contenido)
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 20),
-                          color: const Color(0xFF7D8B7A),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.edit, color: Colors.white),
-                              SizedBox(width: 10),
-                              Text('Editar Ticket', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
-                            ],
-                          ),
+                    Positioned(
+                      top: 120,
+                      right: -35,
+                      child: Opacity(
+                        opacity: 0.22,
+                        child: Image.asset(
+                          'assets/images/eng_dere_arriba_editicket.png',
+                          width: 145,
                         ),
-                        
-                        // Formulario con Padding (Fondo transparente para ver los engranajes)
-                        Padding(
-                          padding: const EdgeInsets.all(20),
-                          // Importante: El Column no debe tener color de fondo
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('Nombre:', style: TextStyle(fontWeight: FontWeight.bold)),
-                              const SizedBox(height: 5),
-                              TextField(
-                                controller: nombreCtrl,
-                                decoration: InputDecoration(filled: true, fillColor: AppTheme.inputColor.withOpacity(0.8), border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none)),
-                              ),
-                              const SizedBox(height: 15),
-                              const Text('Descripción:', style: TextStyle(fontWeight: FontWeight.bold)),
-                              const SizedBox(height: 5),
-                              TextField(
-                                controller: probCtrl,
-                                maxLines: 4,
-                                decoration: InputDecoration(filled: true, fillColor: AppTheme.inputColor.withOpacity(0.8), border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none)),
-                              ),
-                              const SizedBox(height: 15),
-                              const Text('Prioridad', style: TextStyle(fontWeight: FontWeight.bold)),
-                              const SizedBox(height: 5),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 15),
-                                decoration: BoxDecoration(color: AppTheme.inputColor.withOpacity(0.8), borderRadius: BorderRadius.circular(15)),
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton<String>(
-                                    value: prioridadSel,
-                                    isExpanded: true,
-                                    items: ['Crítica', 'Alta', 'Media', 'Baja', 'Mínima'].map((String val) => DropdownMenuItem(value: val, child: Text(val))).toList(),
-                                    onChanged: (nuevoVal) {
-                                      setStateModal(() => prioridadSel = nuevoVal!);
-                                    },
+                      ),
+                    ),
+
+                    Positioned(
+                      left: -55,
+                      bottom: 180,
+                      child: Opacity(
+                        opacity: 0.22,
+                        child: Image.asset(
+                          'assets/images/engrane_izq.png',
+                          width: 185,
+                        ),
+                      ),
+                    ),
+
+                    Positioned(
+                      right: -30,
+                      bottom: -35,
+                      child: Opacity(
+                        opacity: 0.30,
+                        child: Image.asset(
+                          'assets/images/eng_izq_aba_editicket.png',
+                          width: 165,
+                        ),
+                      ),
+                    ),
+
+                    SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 22,
+                            ),
+                            color: const Color(0xFF90A48E),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.edit,
+                                  color: Colors.white,
+                                  size: 26,
+                                ),
+                                SizedBox(width: 12),
+                                Text(
+                                  'Editar Ticket',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 25,
+                                    fontWeight: FontWeight.w900,
                                   ),
                                 ),
-                              ),
-                              const SizedBox(height: 30),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: ElevatedButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF90A48E), padding: const EdgeInsets.symmetric(vertical: 15)),
-                                      child: const Text('Cancelar', style: TextStyle(color: Colors.white)),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 15),
-                                  Expanded(
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        int nuevaPrio = 5;
-                                        if (prioridadSel == 'Crítica') nuevaPrio = 1;
-                                        if (prioridadSel == 'Alta') nuevaPrio = 2;
-                                        if (prioridadSel == 'Media') nuevaPrio = 3;
-                                        if (prioridadSel == 'Baja') nuevaPrio = 4;
-                                        _enviarEdicion(ticket['_id'], nombreCtrl.text, probCtrl.text, nuevaPrio);
-                                      },
-                                      style: ElevatedButton.styleFrom(backgroundColor: AppTheme.primaryColor, padding: const EdgeInsets.symmetric(vertical: 15)),
-                                      child: const Text('Guardar', style: TextStyle(color: Colors.white)),
-                                    ),
-                                  ),
-                                ],
-                              )
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              22,
+                              22,
+                              22,
+                              24,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Nombre:',
+                                  style: TextStyle(
+                                    color: Color(0xFF1D2E36),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 8),
+
+                                TextField(
+                                  controller: nombreCtrl,
+                                  decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: const Color(0xFFE9EEDF)
+                                        .withOpacity(0.90),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 18,
+                                      vertical: 18,
+                                    ),
+                                  ),
+                                ),
+
+                                const SizedBox(height: 20),
+
+                                const Text(
+                                  'Descripción:',
+                                  style: TextStyle(
+                                    color: Color(0xFF1D2E36),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 8),
+
+                                TextField(
+                                  controller: probCtrl,
+                                  maxLines: 5,
+                                  decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: const Color(0xFFE9EEDF)
+                                        .withOpacity(0.90),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 18,
+                                      vertical: 18,
+                                    ),
+                                  ),
+                                ),
+
+                                const SizedBox(height: 20),
+
+                                const Text(
+                                  'Prioridad',
+                                  style: TextStyle(
+                                    color: Color(0xFF1D2E36),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 8),
+
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 18,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFE9EEDF)
+                                        .withOpacity(0.90),
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<String>(
+                                      value: prioridadSel,
+                                      isExpanded: true,
+                                      icon: const Icon(
+                                        Icons.keyboard_arrow_down,
+                                        color: Color(0xFF173847),
+                                      ),
+                                      items: [
+                                        'Crítica',
+                                        'Alta',
+                                        'Media',
+                                        'Baja',
+                                        'Mínima',
+                                      ].map((String val) {
+                                        return DropdownMenuItem(
+                                          value: val,
+                                          // AQUÍ ESTÁ LA MAGIA DEL COLOR INTEGRADA
+                                          child: _buildPriorityOption(val), 
+                                        );
+                                      }).toList(),
+                                      onChanged: (nuevoVal) {
+                                        setStateModal(() {
+                                          prioridadSel = nuevoVal!;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+
+                                const SizedBox(height: 32),
+
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: ElevatedButton(
+                                        onPressed: () =>
+                                            Navigator.pop(context),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor:
+                                              const Color(0xFF90A48E),
+                                          padding:
+                                              const EdgeInsets.symmetric(
+                                            vertical: 16,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          'Cancelar',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w900,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+
+                                    const SizedBox(width: 16),
+
+                                    Expanded(
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          int nuevaPrio = 5;
+
+                                          if (prioridadSel == 'Crítica') {
+                                            nuevaPrio = 1;
+                                          }
+
+                                          if (prioridadSel == 'Alta') {
+                                            nuevaPrio = 2;
+                                          }
+
+                                          if (prioridadSel == 'Media') {
+                                            nuevaPrio = 3;
+                                          }
+
+                                          if (prioridadSel == 'Baja') {
+                                            nuevaPrio = 4;
+                                          }
+
+                                          _enviarEdicion(
+                                            ticket['_id'],
+                                            nombreCtrl.text,
+                                            probCtrl.text,
+                                            nuevaPrio,
+                                          );
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor:
+                                              const Color(0xFF173847),
+                                          padding:
+                                              const EdgeInsets.symmetric(
+                                            vertical: 16,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          'Guardar',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w900,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
-        });
+            );
+          },
+        );
       },
     );
   }
-
-
-
-
 
   void _mostrarModalExitoEdicion() {
     showDialog(
@@ -361,14 +539,13 @@ void _mostrarModalEditar(dynamic ticket) {
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
         backgroundColor: AppTheme.backgroundColor, elevation: 0, iconTheme: const IconThemeData(color: AppTheme.primaryColor),
-        //title: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.confirmation_num, color: AppTheme.primaryColor), SizedBox(width: 8), Text('GestiónTech', style: TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold)), SizedBox(width: 48)]),
         title: Row(
-  mainAxisAlignment: MainAxisAlignment.center,
-  children: [
-    Image.asset('assets/images/logotech.png', height: 35), // <-- TU LOGO AQUÍ
-    const SizedBox(width: 48), // Mantenemos este espacio para que quede bien centrado
-  ],
-),
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset('assets/images/logotech.png', height: 35), 
+            const SizedBox(width: 48), 
+          ],
+        ),
       ),
       drawer: const CustomDrawer(), 
       body: SingleChildScrollView(
@@ -376,15 +553,14 @@ void _mostrarModalEditar(dynamic ticket) {
           children: [
             Container(
               width: double.infinity, padding: const EdgeInsets.only(top: 30, bottom: 50, left: 20, right: 20), 
-              //decoration: const BoxDecoration(color: Color(0xFF7D8B7A)), 
               decoration: const BoxDecoration(
-  color: Color.fromARGB(255, 131, 148, 127),
-  image: DecorationImage(
-    image: AssetImage('assets/images/fondo_tech.png'), // <-- TU ILUSTRACIÓN AQUÍ
-    fit: BoxFit.cover, // Para que cubra todo el contenedor
-    opacity: 0.7, // Opacidad baja para que no estorbe la lectura de los números
-  ),
-),
+                color: Color.fromARGB(255, 131, 148, 127),
+                image: DecorationImage(
+                  image: AssetImage('assets/images/fondo_tech.png'), 
+                  fit: BoxFit.cover, 
+                  opacity: 0.7, 
+                ),
+              ),
               child: Column(
                 children: [
                   Container(
@@ -422,8 +598,8 @@ void _mostrarModalEditar(dynamic ticket) {
                           child: SizedBox(
                             height: 35, 
                             child: TextField(
-                              controller: _searchController, // <-- CONECTADO
-                              onChanged: (value) => _filtrarTickets(), // <-- FILTRA AL ESCRIBIR
+                              controller: _searchController, 
+                              onChanged: (value) => _filtrarTickets(), 
                               decoration: InputDecoration(hintText: 'Buscar Ticket...', contentPadding: const EdgeInsets.symmetric(horizontal: 10), border: OutlineInputBorder(borderRadius: BorderRadius.circular(5)))
                             )
                           )
@@ -437,15 +613,21 @@ void _mostrarModalEditar(dynamic ticket) {
                         Expanded(
                           child: Container(
                             height: 35, padding: const EdgeInsets.symmetric(horizontal: 10), decoration: BoxDecoration(border: Border.all(color: Colors.grey), borderRadius: BorderRadius.circular(5)),
-                            child: DropdownButtonHideUnderline(
+child: DropdownButtonHideUnderline(
                               child: DropdownButton<String>(
-                                value: _filtroPrioridad, // <-- CONECTADO
+                                value: _filtroPrioridad, 
                                 isExpanded: true,
-                                items: ['Todas', 'Crítica', 'Alta', 'Media', 'Baja', 'Mínima'].map((String val) => DropdownMenuItem(value: val, child: Text(val))).toList(),
+                                // AQUÍ HACEMOS EL CAMBIO PARA LLAMAR A LA MAGIA DE COLORES
+                                items: ['Todas', 'Crítica', 'Alta', 'Media', 'Baja', 'Mínima'].map((String val) {
+                                  return DropdownMenuItem(
+                                    value: val, 
+                                    child: _buildPriorityOption(val) // <-- Reemplazamos el Text(val)
+                                  );
+                                }).toList(),
                                 onChanged: (nuevoVal) {
                                   setState(() {
                                     _filtroPrioridad = nuevoVal!;
-                                    _filtrarTickets(); // <-- FILTRA AL CAMBIAR LA OPCIÓN
+                                    _filtrarTickets(); 
                                   });
                                 },
                               ),
@@ -454,7 +636,7 @@ void _mostrarModalEditar(dynamic ticket) {
                         ),
                         const SizedBox(width: 10),
                         ElevatedButton(
-                          onPressed: _filtrarTickets, // El botón también hace la magia
+                          onPressed: _filtrarTickets, 
                           style: ElevatedButton.styleFrom(minimumSize: const Size(80, 35)), child: const Text('Filtrar')
                         )
                       ],
@@ -465,10 +647,10 @@ void _mostrarModalEditar(dynamic ticket) {
             ),
             _isLoading 
               ? const CircularProgressIndicator(color: AppTheme.primaryColor)
-              : _ticketsFiltrados.isEmpty // <-- CAMBIADO A TICKETS FILTRADOS
+              : _ticketsFiltrados.isEmpty 
                   ? const Padding(padding: EdgeInsets.all(20.0), child: Text('No hay tickets que coincidan', style: TextStyle(fontSize: 16, color: Colors.grey)))
                   : ListView.builder(
-                      shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), itemCount: _ticketsFiltrados.length, // <-- CAMBIADO A TICKETS FILTRADOS
+                      shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), itemCount: _ticketsFiltrados.length, 
                       itemBuilder: (context, index) => Padding(padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20), child: _buildTicketCard(_ticketsFiltrados[index])),
                     ),
             const SizedBox(height: 20),
@@ -518,7 +700,7 @@ void _mostrarModalEditar(dynamic ticket) {
                       Row(
                         children: [
                           const Text('Estatus: ', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                          Text(esPendiente ? 'Pendiente' : 'Atendido', style: TextStyle(color: esPendiente ? const Color(0xFFFF5C5C) : const Color(0xFF7D8B7A), fontWeight: FontWeight.bold, fontSize: 13)),
+                          Text(esPendiente ? 'Pendiente' : 'Atendido', style: TextStyle(color: esPendiente ? const Color(0xFFFF5C5C) : const Color.fromARGB(244, 17, 157, 34), fontWeight: FontWeight.bold, fontSize: 13)),
                         ],
                       ),
                       if (_esAdmin)

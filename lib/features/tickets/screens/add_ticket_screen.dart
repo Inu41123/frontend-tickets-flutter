@@ -1,10 +1,14 @@
+// lib/features/tickets/screens/add_ticket_screen.dart
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-// IMPORTAMOS LA LIBRERÍA
+// IMPORTAMOS AWESOME NOTIFICATIONS
 import 'package:awesome_notifications/awesome_notifications.dart';
+// IMPORTAMOS LAS LIBRERÍAS DE LOS ENGRANAJES
+import '../../help_center/widgets/rotating_gear.dart';
+import '../../help_center/widgets/app_logo.dart'; // Por si quieres usar el logo original
 
 class AddTicketScreen extends StatefulWidget {
   const AddTicketScreen({Key? key}) : super(key: key);
@@ -254,6 +258,8 @@ class _AddTicketScreenState extends State<AddTicketScreen> with SingleTickerProv
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
+        // Quitamos la flechita de arriba (redundante)
+        automaticallyImplyLeading: false, 
         backgroundColor: AppTheme.backgroundColor,
         elevation: 0,
         iconTheme: const IconThemeData(color: AppTheme.primaryColor),
@@ -263,16 +269,22 @@ class _AddTicketScreenState extends State<AddTicketScreen> with SingleTickerProv
             Icon(Icons.confirmation_num, color: AppTheme.primaryColor),
             SizedBox(width: 8),
             Text('GestiónTech', style: TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.bold)),
-            SizedBox(width: 48),
+            SizedBox(width: 48), // Espacio para el back button
           ],
         ),
       ),
+      // CAMBIO IMPORTANTE: Stack para los engranajes giratorios en el fondo
       body: Stack(
         children: [
-          _buildGearAnimation('assets/images/eng_dere_arriba_agregarticket.png', top: -20, right: -30, width: 150, opacity: 0.5, speed: 0.5),
-          _buildGearAnimation('assets/images/engrane_izq.png', bottom: -20, left: -30, width: 150, opacity: 0.3, speed: -0.3),
-          _buildGearAnimation('assets/images/eng_dere_abajo_agregarticket.png', bottom: 50, right: -40, width: 180, opacity: 0.4, speed: 0.7),
+          // ==========================================
+          // ENGRANAJES GIRATORIOS (NUEVO!)
+          // ==========================================
+          Positioned(right: -45, top: 150, child: RotatingGear(size: 130, color: AppTheme.textBodyColor.withOpacity(.55))),
+          Positioned(left: -75, top: 300, child: RotatingGear(size: 145, color: const Color(0xFFDDE9DE).withOpacity(.75))),
+          Positioned(right: -35, bottom: 120, child: RotatingGear(size: 105, color: const Color(0xFFBFD8D0).withOpacity(.85))),
+          Positioned(left: -25, bottom: 60, child: RotatingGear(size: 75, color: const Color(0xFFD8E8D4).withOpacity(.85))),
 
+          // EL CONTENIDO DE LA PANTALLA (Inalterado)
           FadeTransition(
             opacity: _fadeAnimation,
             child: SlideTransition(
@@ -331,22 +343,7 @@ class _AddTicketScreenState extends State<AddTicketScreen> with SingleTickerProv
     );
   }
 
-  Widget _buildGearAnimation(String asset, {double? top, double? right, double? bottom, double? left, required double width, required double opacity, required double speed}) {
-    return Positioned(
-      top: top, right: right, bottom: bottom, left: left,
-      child: TweenAnimationBuilder(
-        duration: const Duration(seconds: 20),
-        tween: Tween<double>(begin: 0, end: 360),
-        builder: (context, double angle, child) {
-          return Transform.rotate(
-            angle: angle * 3.14159 / 180 * speed,
-            child: Opacity(opacity: opacity, child: Image.asset(asset, width: width)),
-          );
-        },
-      ),
-    );
-  }
-
+  // WIDGETS DE COMPONENTES (Inalterados)
   Widget _buildAnimatedBackButton() {
     return StatefulBuilder(
       builder: (context, setStateButton) {

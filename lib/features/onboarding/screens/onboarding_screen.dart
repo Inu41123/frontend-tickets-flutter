@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../auth/screens/login_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -25,7 +27,7 @@ class _OnboardingScreenState
     },
     {
       "image":
-          "assets/onboarding/iniciaSesion.jpeg",
+          "assets/onboarding/nucleare.jpeg",
       "title": "Inicia sesión",
       "desc":
           "Accede con tu correo y contraseña para consultar tus tickets.",
@@ -45,20 +47,29 @@ class _OnboardingScreenState
           "Describe tu problema y envía tickets fácilmente.",
     },
     {
-  "image": "assets/onboarding/editar.jpeg",
-  "title": "Edita tickets",
-  "desc":
-      "Actualiza información, cambia prioridad o modifica tickets registrados.",
-},
+      "image":
+          "assets/onboarding/editar.jpeg",
+      "title": "Edita tickets",
+      "desc":
+          "Actualiza información, cambia prioridad o modifica tickets registrados.",
+    },
   ];
 
-  void nextPage() {
+  Future<void> nextPage() async {
     if (currentPage < pages.length - 1) {
       _controller.nextPage(
         duration: const Duration(milliseconds: 350),
         curve: Curves.easeInOut,
       );
     } else {
+      final prefs =
+          await SharedPreferences.getInstance();
+
+      await prefs.setBool(
+        'onboardingShown',
+        true,
+      );
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -66,6 +77,23 @@ class _OnboardingScreenState
         ),
       );
     }
+  }
+
+  Future<void> skipOnboarding() async {
+    final prefs =
+        await SharedPreferences.getInstance();
+
+    await prefs.setBool(
+      'onboardingShown',
+      true,
+    );
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const LoginScreen(),
+      ),
+    );
   }
 
   @override
@@ -84,15 +112,8 @@ class _OnboardingScreenState
               child: Align(
                 alignment: Alignment.topRight,
                 child: TextButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            const LoginScreen(),
-                      ),
-                    );
-                  },
+                  onPressed: skipOnboarding,
+
                   child: const Text(
                     'Omitir',
                     style: TextStyle(
@@ -123,70 +144,76 @@ class _OnboardingScreenState
                     padding:
                         const EdgeInsets.symmetric(
                             horizontal: 28),
+                    // ==========================================
+                    // ¡EL HACK MÁGICO! (Center + SingleChildScrollView)
+                    // ==========================================
+                    child: Center(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisAlignment:
+                              MainAxisAlignment.center,
 
-                    child: Column(
-                      mainAxisAlignment:
-                          MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              height: 430,
 
-                      children: [
-                        Container(
-                          height: 430,
+                              decoration: BoxDecoration(
+                                borderRadius:
+                                    BorderRadius.circular(
+                                        30),
 
-                          decoration: BoxDecoration(
-                            borderRadius:
-                                BorderRadius.circular(
-                                    30),
-
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black
-                                    .withOpacity(.12),
-                                blurRadius: 15,
-                                offset:
-                                    const Offset(0, 8),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black
+                                        .withOpacity(.12),
+                                    blurRadius: 15,
+                                    offset:
+                                        const Offset(0, 8),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
 
-                          child: ClipRRect(
-                            borderRadius:
-                                BorderRadius.circular(
-                                    30),
+                              child: ClipRRect(
+                                borderRadius:
+                                    BorderRadius.circular(
+                                        30),
 
-                            child: Image.asset(
-                              page["image"]!,
-                              fit: BoxFit.cover,
+                                child: Image.asset(
+                                  page["image"]!,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
                             ),
-                          ),
+
+                            const SizedBox(height: 40),
+
+                            Text(
+                              page["title"]!,
+                              textAlign: TextAlign.center,
+
+                              style: const TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w900,
+                                color: Color(0xFF173847),
+                              ),
+                            ),
+
+                            const SizedBox(height: 18),
+
+                            Text(
+                              page["desc"]!,
+                              textAlign: TextAlign.center,
+
+                              style: const TextStyle(
+                                fontSize: 15,
+                                height: 1.4,
+                                color: Colors.black54,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
-
-                        const SizedBox(height: 40),
-
-                        Text(
-                          page["title"]!,
-                          textAlign: TextAlign.center,
-
-                          style: const TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w900,
-                            color: Color(0xFF173847),
-                          ),
-                        ),
-
-                        const SizedBox(height: 18),
-
-                        Text(
-                          page["desc"]!,
-                          textAlign: TextAlign.center,
-
-                          style: const TextStyle(
-                            fontSize: 15,
-                            height: 1.4,
-                            color: Colors.black54,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   );
                 },

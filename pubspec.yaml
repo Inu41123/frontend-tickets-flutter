@@ -103,16 +103,16 @@ flutter:
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/logos/logo_icon.png" # <--- Pon la ruta correcta de tu logo
+  image_path: "assets/logos/logo_icon.jpeg" # <--- Pon la ruta correcta de tu logo
   adaptive_icon_background: "#FFFFFF" # Color de fondo si el logo es transparente
-  adaptive_icon_foreground: "assets/logos/logo_icon.png"
+  adaptive_icon_foreground: "assets/logos/logo_icon.jpeg"
 
 # ==========================================
 # CONFIGURACIÓN DE LA PANTALLA DE CARGA (SPLASH)
 # ==========================================
 flutter_native_splash:
   color: "#FFFFFF" # El color de fondo de toda la pantalla (cámbialo por el color de tu app)
-  image: "assets/logos/logo_splash.png" # <--- Tu logo centrado
+  image: "assets/logos/logo_splash.jpeg" # <--- Tu logo centrado
   android_12:
-    image: "assets/logos/logo_splash.png"
-    icon_background_color: "#FFFFFF"
+    image: "assets/logos/logo_splash.jpeg"
+    icon_background_color: "#F9FAF3"
