@@ -3,12 +3,31 @@ import 'package:flutter/material.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:awesome_notifications/awesome_notifications.dart'; 
 
-void main() async{
-  // 2. Agrega estas dos líneas de seguridad
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Inicializamos Firebase primero
   await Firebase.initializeApp();
-// Aqui cambiamos el async para asegurarnos de que Firebase se inicialice antes de ejecutar la app, si de plano vuelo la app, puedes quitar el await y el async, pero es recomendable inicializar Firebase antes de ejecutar la app para evitar errores relacionados con Firebase.
+
+  // ==========================================
+  // 2. INICIALIZAR AWESOME NOTIFICATIONS
+  // ==========================================
+  AwesomeNotifications().initialize(
+    null, // null significa que usará el ícono por defecto de tu app
+    [
+      NotificationChannel(
+        channelGroupKey: 'basic_channel_group',
+        channelKey: 'basic_channel', // Este es el ID que usamos en tu add_ticket_screen
+        channelName: 'Notificaciones Básicas',
+        channelDescription: 'Canal para notificaciones de tickets',
+        defaultColor: const Color(0xFF7D8B7A), // El color verde primario de tu AppTheme
+        ledColor: Colors.white,
+        importance: NotificationImportance.High,
+      )
+    ],
+  );
 
   runApp(const MyApp());
 }

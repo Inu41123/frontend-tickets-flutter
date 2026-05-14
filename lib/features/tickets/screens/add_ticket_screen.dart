@@ -3,6 +3,8 @@ import '../../../core/theme/app_theme.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+// IMPORTAMOS LA LIBRERÍA
+import 'package:awesome_notifications/awesome_notifications.dart';
 
 class AddTicketScreen extends StatefulWidget {
   const AddTicketScreen({Key? key}) : super(key: key);
@@ -27,6 +29,16 @@ class _AddTicketScreenState extends State<AddTicketScreen> with SingleTickerProv
   @override
   void initState() {
     super.initState();
+    
+    // ==========================================
+    // PEDIR PERMISO DE NOTIFICACIONES AL ENTRAR
+    // ==========================================
+    AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
+      if (!isAllowed) {
+        AwesomeNotifications().requestPermissionToSendNotifications();
+      }
+    });
+
     // Configurar animaciones de entrada
     _animationController = AnimationController(
       vsync: this,
@@ -68,23 +80,12 @@ class _AddTicketScreenState extends State<AddTicketScreen> with SingleTickerProv
 
     int prioridadNumero;
     switch (_prioridadSeleccionada) {
-      case 'Crítica':
-        prioridadNumero = 1;
-        break;
-      case 'Alta':
-        prioridadNumero = 2;
-        break;
-      case 'Media':
-        prioridadNumero = 3;
-        break;
-      case 'Baja':
-        prioridadNumero = 4;
-        break;
-      case 'Mínima':
-        prioridadNumero = 5;
-        break;
-      default:
-        prioridadNumero = 3;
+      case 'Crítica': prioridadNumero = 1; break;
+      case 'Alta': prioridadNumero = 2; break;
+      case 'Media': prioridadNumero = 3; break;
+      case 'Baja': prioridadNumero = 4; break;
+      case 'Mínima': prioridadNumero = 5; break;
+      default: prioridadNumero = 3;
     }
 
     setState(() => _isLoading = true);
@@ -119,6 +120,20 @@ class _AddTicketScreenState extends State<AddTicketScreen> with SingleTickerProv
       setState(() => _isLoading = false);
 
       if (response.statusCode == 201) {
+        
+        // ==========================================
+        // ¡DISPARAR LA NOTIFICACIÓN LOCAL!
+        // ==========================================
+        AwesomeNotifications().createNotification(
+          content: NotificationContent(
+            id: DateTime.now().millisecondsSinceEpoch.remainder(100000), // ID único
+            channelKey: 'basic_channel', // Debe coincidir con el del main.dart
+            title: '🎫 ¡Ticket Registrado!',
+            body: 'Tu reporte "${_nombreController.text}" se ha enviado al equipo de GestiónTech.',
+            notificationLayout: NotificationLayout.Default,
+          )
+        );
+
         await _mostrarModalExito();
       } else {
         final error = jsonDecode(response.body);
@@ -140,9 +155,6 @@ class _AddTicketScreenState extends State<AddTicketScreen> with SingleTickerProv
 
   // Animación de "shake" para campos vacíos
   Future<void> _shakeFields() async {
-    final scaffoldContext = context;
-    // Encontrar los campos y hacerles shake
-    // (efecto visual simple con un breve delay)
     for (int i = 0; i < 3; i++) {
       await Future.delayed(const Duration(milliseconds: 50));
       if (mounted) {
@@ -152,7 +164,6 @@ class _AddTicketScreenState extends State<AddTicketScreen> with SingleTickerProv
   }
 
   Future<void> _mostrarModalExito() async {
-    // Animación del modal con escala
     await showDialog(
       context: context,
       barrierDismissible: false,
@@ -178,7 +189,6 @@ class _AddTicketScreenState extends State<AddTicketScreen> with SingleTickerProv
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Animación del ícono de check
                   TweenAnimationBuilder(
                     duration: const Duration(milliseconds: 500),
                     tween: Tween<double>(begin: 0, end: 1),
@@ -259,12 +269,10 @@ class _AddTicketScreenState extends State<AddTicketScreen> with SingleTickerProv
       ),
       body: Stack(
         children: [
-          // FONDO: Engranajes con animación de rotación suave
           _buildGearAnimation('assets/images/eng_dere_arriba_agregarticket.png', top: -20, right: -30, width: 150, opacity: 0.5, speed: 0.5),
           _buildGearAnimation('assets/images/engrane_izq.png', bottom: -20, left: -30, width: 150, opacity: 0.3, speed: -0.3),
           _buildGearAnimation('assets/images/eng_dere_abajo_agregarticket.png', bottom: 50, right: -40, width: 180, opacity: 0.4, speed: 0.7),
 
-          // CONTENIDO PRINCIPAL CON ANIMACIONES DE ENTRADA
           FadeTransition(
             opacity: _fadeAnimation,
             child: SlideTransition(
@@ -275,7 +283,6 @@ class _AddTicketScreenState extends State<AddTicketScreen> with SingleTickerProv
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Header con animación de botón de regreso
                       Row(
                         children: [
                           _buildAnimatedBackButton(),
@@ -291,7 +298,6 @@ class _AddTicketScreenState extends State<AddTicketScreen> with SingleTickerProv
                       ),
                       const SizedBox(height: 30),
 
-                      // Campo Nombre con animación al focus
                       _buildAnimatedTextField(
                         label: 'Nombre:',
                         hint: 'Introduce el nombre del ticket',
@@ -299,7 +305,6 @@ class _AddTicketScreenState extends State<AddTicketScreen> with SingleTickerProv
                       ),
                       const SizedBox(height: 20),
 
-                      // Campo Descripción
                       _buildAnimatedTextField(
                         label: 'Descripción:',
                         hint: 'Describe la problemática',
@@ -309,11 +314,9 @@ class _AddTicketScreenState extends State<AddTicketScreen> with SingleTickerProv
                       ),
                       const SizedBox(height: 10),
 
-                      // Campo Prioridad con animación
                       _buildAnimatedPriorityDropdown(),
                       const SizedBox(height: 40),
 
-                      // Botón Enviar con animaciones de hover/click
                       Center(
                         child: _buildAnimatedSubmitButton(),
                       ),
@@ -328,30 +331,22 @@ class _AddTicketScreenState extends State<AddTicketScreen> with SingleTickerProv
     );
   }
 
-  // Widget: Engranaje con animación de rotación
   Widget _buildGearAnimation(String asset, {double? top, double? right, double? bottom, double? left, required double width, required double opacity, required double speed}) {
     return Positioned(
-      top: top,
-      right: right,
-      bottom: bottom,
-      left: left,
+      top: top, right: right, bottom: bottom, left: left,
       child: TweenAnimationBuilder(
         duration: const Duration(seconds: 20),
         tween: Tween<double>(begin: 0, end: 360),
         builder: (context, double angle, child) {
           return Transform.rotate(
             angle: angle * 3.14159 / 180 * speed,
-            child: Opacity(
-              opacity: opacity,
-              child: Image.asset(asset, width: width),
-            ),
+            child: Opacity(opacity: opacity, child: Image.asset(asset, width: width)),
           );
         },
       ),
     );
   }
 
-  // Widget: Botón de regreso animado
   Widget _buildAnimatedBackButton() {
     return StatefulBuilder(
       builder: (context, setStateButton) {
@@ -371,15 +366,8 @@ class _AddTicketScreenState extends State<AddTicketScreen> with SingleTickerProv
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+                    shape: BoxShape.circle, color: Colors.white,
+                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8, offset: const Offset(0, 2))],
                   ),
                   child: const Icon(Icons.arrow_back, size: 30, color: Colors.black),
                 ),
@@ -391,13 +379,8 @@ class _AddTicketScreenState extends State<AddTicketScreen> with SingleTickerProv
     );
   }
 
-  // Widget: Campo de texto con animaciones
   Widget _buildAnimatedTextField({
-    required String label,
-    required String hint,
-    required TextEditingController controller,
-    int maxLines = 1,
-    int? maxLength,
+    required String label, required String hint, required TextEditingController controller, int maxLines = 1, int? maxLength,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -410,28 +393,15 @@ class _AddTicketScreenState extends State<AddTicketScreen> with SingleTickerProv
           builder: (context, double value, child) {
             return Transform.translate(
               offset: Offset(0, 20 * (1 - value)),
-              child: Opacity(
-                opacity: value,
-                child: child,
-              ),
+              child: Opacity(opacity: value, child: child),
             );
           },
           child: TextField(
-            controller: controller,
-            maxLines: maxLines,
-            maxLength: maxLength,
+            controller: controller, maxLines: maxLines, maxLength: maxLength,
             decoration: InputDecoration(
-              hintText: hint,
-              filled: true,
-              fillColor: AppTheme.inputColor,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide.none,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: AppTheme.primaryColor, width: 2),
-              ),
+              hintText: hint, filled: true, fillColor: AppTheme.inputColor,
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
+              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: AppTheme.primaryColor, width: 2)),
             ),
           ),
         ),
@@ -439,7 +409,6 @@ class _AddTicketScreenState extends State<AddTicketScreen> with SingleTickerProv
     );
   }
 
-  // Widget: Dropdown de prioridad animado
   Widget _buildAnimatedPriorityDropdown() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -451,31 +420,19 @@ class _AddTicketScreenState extends State<AddTicketScreen> with SingleTickerProv
           tween: Tween<double>(begin: 0, end: 1),
           curve: Curves.easeOut,
           builder: (context, double value, child) {
-            return Transform.scale(
-              scale: 0.9 + (value * 0.1),
-              child: child,
-            );
+            return Transform.scale(scale: 0.9 + (value * 0.1), child: child);
           },
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 15),
-            decoration: BoxDecoration(
-              color: AppTheme.inputColor,
-              borderRadius: BorderRadius.circular(15),
-            ),
+            decoration: BoxDecoration(color: AppTheme.inputColor, borderRadius: BorderRadius.circular(15)),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
-                value: _prioridadSeleccionada,
-                isExpanded: true,
+                value: _prioridadSeleccionada, isExpanded: true,
                 items: ['Crítica', 'Alta', 'Media', 'Baja', 'Mínima'].map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: _buildPriorityOption(value),
-                  );
+                  return DropdownMenuItem<String>(value: value, child: _buildPriorityOption(value));
                 }).toList(),
                 onChanged: (newValue) {
-                  setState(() {
-                    _prioridadSeleccionada = newValue!;
-                  });
+                  setState(() { _prioridadSeleccionada = newValue!; });
                 },
               ),
             ),
@@ -485,42 +442,23 @@ class _AddTicketScreenState extends State<AddTicketScreen> with SingleTickerProv
     );
   }
 
-  // Opción de prioridad con color
   Widget _buildPriorityOption(String priority) {
     Color color;
     switch (priority) {
-      case 'Crítica':
-        color = const Color(0xFFdc3545);
-        break;
-      case 'Alta':
-        color = const Color(0xFFfd7e14);
-        break;
-      case 'Media':
-        color = const Color(0xFFffc107);
-        break;
-      case 'Baja':
-        color = const Color(0xFF0d6efd);
-        break;
-      default:
-        color = const Color(0xFF6dbd58);
+      case 'Crítica': color = const Color(0xFFdc3545); break;
+      case 'Alta': color = const Color(0xFFfd7e14); break;
+      case 'Media': color = const Color(0xFFffc107); break;
+      case 'Baja': color = const Color(0xFF0d6efd); break;
+      default: color = const Color(0xFF6dbd58);
     }
     return Row(
       children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Text(priority),
+        Container(width: 12, height: 12, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+        const SizedBox(width: 8), Text(priority),
       ],
     );
   }
 
-  // Widget: Botón de enviar con animaciones completas
   Widget _buildAnimatedSubmitButton() {
     return StatefulBuilder(
       builder: (context, setStateButton) {
@@ -535,36 +473,21 @@ class _AddTicketScreenState extends State<AddTicketScreen> with SingleTickerProv
                 scale: scale,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
-width: _isLoading ? 60 : MediaQuery.of(context).size.width,
+                  width: _isLoading ? 60 : MediaQuery.of(context).size.width,
                   height: 50,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(_isLoading ? 30 : 10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.primaryColor.withOpacity(0.4),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
+                    boxShadow: [BoxShadow(color: AppTheme.primaryColor.withOpacity(0.4), blurRadius: 12, offset: const Offset(0, 4))],
                   ),
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _enviarTicket,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(_isLoading ? 30 : 10),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_isLoading ? 30 : 10)),
                       animationDuration: const Duration(milliseconds: 300),
                     ),
                     child: _isLoading
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
+                        ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2.5, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)))
                         : const Text('Enviar Ticket', style: TextStyle(fontSize: 16)),
                   ),
                 ),
